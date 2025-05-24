@@ -1,0 +1,40 @@
+.bulk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: monospace;
+  background: #fff1e6;
+  color: #b1521e;
+  border-radius: 10px;
+  margin: 0 auto;
+  table-layout: fixed;
+}
+
+.bulk-table th, .bulk-table td {
+  padding: 8px 8px;
+  border-bottom: 1.5px solid #fae0cc;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 1.06em;
+}
+
+.bulk-table th {
+  color: #e95a16;
+  font-weight: 700;
+  background: #fff1e6;
+  border-bottom: 2px solid #f5af62;
+  text-align: center;
+}
+
+.bulk-table tr:last-child td {
+  border-bottom: none;
+}
+
+.bulk-table a {
+  color: #e95a16;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.bulk-table a:hover {
+  text-decoration: underline;
+}
