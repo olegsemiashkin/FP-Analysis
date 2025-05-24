@@ -1,44 +1,32 @@
-import dynamic from "next/dynamic";
-import "leaflet/dist/leaflet.css";
+// components/Map.js
 
-const LeafletMap = dynamic(
-  async () => {
-    const { MapContainer, TileLayer, CircleMarker } = await import("react-leaflet");
-    return function InnerMap({ lat, lon }) {
-      if (typeof window === "undefined") return null;
-      return (
-        <MapContainer
-          center={[lat, lon]}
-          zoom={13}
-          style={{ height: "100%", width: "100%" }}
-          scrollWheelZoom={false}
-          attributionControl={false}
-          dragging={false}
-          zoomControl={false}
-          doubleClickZoom={false}
-          boxZoom={false}
-          keyboard={false}
-        >
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; OpenStreetMap &copy; CARTO'
-          />
-          <CircleMarker
-            center={[lat, lon]}
-            radius={15}
-            fillColor="#f55d2b"
-            color="#f55d2b"
-            fillOpacity={0.40}
-            stroke={false}
-          />
-        </MapContainer>
-      );
-    };
-  },
-  { ssr: false }
-);
+import { MapContainer, TileLayer, Marker, Circle } from 'react-leaflet';
 
-export default function Map({ lat, lon }) {
-  if (!lat || !lon) return null;
-  return <LeafletMap lat={lat} lon={lon} />;
+export default function Map({ lat, lon, city }) {
+  return (
+    <div style={{
+      background: "#fff1e6",
+      border: "2px solid #3793ec",
+      borderRadius: 18,
+      padding: 8,
+      margin: "0 auto"
+    }}>
+      <MapContainer
+        center={[lat, lon]}
+        zoom={10} // Уменьшил для охвата города!
+        style={{ height: 180, width: 320 }}
+        scrollWheelZoom={false}
+        dragging={false}
+        doubleClickZoom={false}
+        zoomControl={false}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        />
+        <Marker position={[lat, lon]} />
+        <Circle center={[lat, lon]} radius={2500} pathOptions={{ color: "#e95a16", fillOpacity: 0.2 }} />
+      </MapContainer>
+    </div>
+  );
 }
