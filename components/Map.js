@@ -2,6 +2,7 @@ import { MapContainer, TileLayer, CircleMarker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 export default function Map({ lat, lon }) {
+  if (typeof window === "undefined") return null; // Защита от SSR!
   return (
     <MapContainer
       center={[lat, lon]}
