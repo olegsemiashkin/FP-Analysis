@@ -1,38 +1,31 @@
+// components/Map.js
 import { MapContainer, TileLayer, Marker, Circle } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
-export default function Map({ lat, lon, city }) {
+export default function GeoMap({ lat, lon }) {
+  if (!lat || !lon) return <div style={{ textAlign: "center", color: "#f55d2b" }}>No map data</div>;
+
   return (
     <div style={{
-      background: "#fff1e6",
-      border: "2.5px solid #3793ec",
-      borderRadius: 18,
-      padding: 10,
-      margin: "0 auto",
-      minWidth: 220,
-      minHeight: 145,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center"
+      background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px #f9d6bd52", padding: 10,
+      display: "flex", justifyContent: "center", alignItems: "center"
     }}>
       <MapContainer
         center={[lat, lon]}
-        zoom={10}
-        style={{
-          height: 135,
-          width: 240,
-          background: "#fff"
-        }}
+        zoom={11}
+        style={{ width: 260, height: 150, borderRadius: 16, border: "3px solid #2981e9", background: "#fff" }}
         scrollWheelZoom={false}
         dragging={false}
         doubleClickZoom={false}
         zoomControl={false}
+        attributionControl={false}
       >
         <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          // Белый минималистичный стиль
+          url="https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
         />
         <Marker position={[lat, lon]} />
-        <Circle center={[lat, lon]} radius={2500} pathOptions={{ color: "#e95a16", fillOpacity: 0.18 }} />
+        <Circle center={[lat, lon]} radius={2000} pathOptions={{ color: "#f55d2b", fillOpacity: 0.22 }} />
       </MapContainer>
     </div>
   );
