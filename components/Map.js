@@ -7,22 +7,24 @@ export default function Map({ lat, lon }) {
   return (
     <div style={{
       width: '100%',
-      height: 150,
+      height: 100,            // чуть ниже — чтобы circle был в центре
       background: '#fff',
-      borderRadius: 16,
-      border: '4px solid #249afd',
-      filter: 'grayscale(0.2) brightness(1.03)',
+      borderRadius: 12,       // 8-12 достаточно
+      border: 'none',         // border убери!
+      filter: 'grayscale(0.18) brightness(1.06)',
       margin: '0 auto',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      boxShadow: "0 1.5px 6px 0 rgba(36, 138, 253, 0.07)"
     }}>
       <MapContainer
         center={[lat, lon]}
-        zoom={10}
+        zoom={11}                        // 12-13 — "идеальное" приближение для города
         style={{
           width: '100%',
           height: '100%',
-          borderRadius: 12,
+          border: 'none',
+          borderRadius: 0,               // убираем radius внутри карты
         }}
         zoomControl={false}
         dragging={false}
@@ -40,8 +42,8 @@ export default function Map({ lat, lon }) {
             color: "#f55d2b",
             fillColor: "#f55d2b",
             fillOpacity: 0.35,
-            weight: 0,
-            opacity: 0.8
+            weight: 2,
+            opacity: 0.7
           }}
         />
       </MapContainer>
