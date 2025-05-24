@@ -1,32 +1,43 @@
 // components/Map.js
-import { MapContainer, TileLayer, Marker, Circle } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer, Circle } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
-export default function GeoMap({ lat, lon }) {
-  if (!lat || !lon) return <div style={{ textAlign: "center", color: "#f55d2b" }}>No map data</div>;
+export default function Map({ lat, lon }) {
+  // Если координаты не переданы — не рендерим карту
+  if (!lat || !lon) return <div style={{ height: 150, background: "#fff", borderRadius: 16 }} />;
 
   return (
-    <div style={{
-      background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px #f9d6bd52", padding: 10,
-      display: "flex", justifyContent: "center", alignItems: "center"
-    }}>
-      <MapContainer
+    <MapContainer
+      center={[lat, lon]}
+      zoom={12}
+      scrollWheelZoom={false}
+      style={{
+        height: 150,
+        width: "100%",
+        borderRadius: 16,
+        border: "4px solid #248afd",
+        background: "#fff", // Белый фон
+        filter: "grayscale(0.2) brightness(1.03)", // Чуть светлее
+        margin: "0 auto",
+      }}
+      dragging={false}
+      doubleClickZoom={false}
+      zoomControl={false}
+      attributionControl={false}
+    >
+      <TileLayer
+        url="https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        attribution=""
+      />
+      <Circle
         center={[lat, lon]}
-        zoom={11}
-        style={{ width: 260, height: 150, borderRadius: 16, border: "3px solid #2981e9", background: "#fff" }}
-        scrollWheelZoom={false}
-        dragging={false}
-        doubleClickZoom={false}
-        zoomControl={false}
-        attributionControl={false}
-      >
-        <TileLayer
-          // Белый минималистичный стиль
-          url="https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-        />
-        <Marker position={[lat, lon]} />
-        <Circle center={[lat, lon]} radius={2000} pathOptions={{ color: "#f55d2b", fillOpacity: 0.22 }} />
-      </MapContainer>
-    </div>
+        radius={2500}
+        pathOptions={{
+          fillColor: "#f55d2b",
+          color: "#f55d2b",
+          fillOpacity: 0.35,
+        }}
+      />
+    </MapContainer>
   );
 }
