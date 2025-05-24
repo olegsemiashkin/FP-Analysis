@@ -1,43 +1,17 @@
-import { useState } from "react";
+import fetch from "node-fetch";
 
-export default function IpBulk() {
-  const [ips, setIps] = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+export default async function handler(req, res) {
+  const { ips } = req.body;
+  const out = [];
 
-  async function handleCheck() {
-    setLoading(true);
-    const res = await fetch("/api/bulk-ip", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ips: ips.split(/[\s,]+/).filter(Boolean) }),
-    });
-    const data = await res.json();
-    setResults(data.results);
-    setLoading(false);
+  for (let ip of ips) {
+    try {
+      const r = await fetch(`https://ipinfo.io/${ip}/json`);
+      const data = await r.json();
+      out.push({ ip, data });
+    } catch (e) {
+      out.push({ ip, data: null });
+    }
   }
-
-  return (
-    <main style={{ padding: 30 }}>
-      <h1>Bulk IP Checker</h1>
-      <textarea
-        rows={6}
-        style={{ width: "100%" }}
-        value={ips}
-        onChange={e => setIps(e.target.value)}
-        placeholder="Вставьте список IP через запятую или с новой строки"
-      />
-      <br />
-      <button onClick={handleCheck} disabled={loading}>
-        {loading ? "Проверяем..." : "Проверить IP"}
-      </button>
-      <ul>
-        {results.map((r, i) => (
-          <li key={i}>
-            {r.ip}: {r.data ? JSON.stringify(r.data) : "Ошибка/Не найдено"}
-          </li>
-        ))}
-      </ul>
-    </main>
-  );
+  res.status(200).json({ results: out });
 }
