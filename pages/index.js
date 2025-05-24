@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 const Map = dynamic(() => import("../components/Map"), { ssr: false });
 
-// Парсер userAgent: всегда есть данные
 function parseUA(ua = "") {
   let browser = "-";
   let os = "-";
@@ -42,9 +41,7 @@ const deviceParams = [
   { key: "deviceMemory", label: "Device RAM" },
 ];
 
-// Функция для извлечения IP-адресов из любого текста
 function extractIPs(text) {
-  // IPv4 only, если нужны IPv6 — добавим!
   const ipRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
   const ips = text.match(ipRegex) || [];
   return Array.from(new Set(ips));
@@ -58,7 +55,6 @@ export default function Home() {
   const [mainData, setMainData] = useState({});
   const [showAll, setShowAll] = useState(false);
 
-  // Bulk IP state (для вкладки)
   const [ips, setIps] = useState("");
   const [results, setResults] = useState([]);
   const [bulkLoading, setBulkLoading] = useState(false);
@@ -71,7 +67,6 @@ export default function Home() {
           setDetails(result.components || {});
           const ipResp = await fetch("https://ipapi.co/json/");
           const ipData = await ipResp.json();
-          // Получаем userAgent — сначала из FPJS, если нет — из браузера
           let ua = result.components?.userAgent?.value;
           if (!ua && typeof window !== "undefined") ua = window.navigator.userAgent;
           const parsed = parseUA(ua);
@@ -91,7 +86,6 @@ export default function Home() {
     });
   }, []);
 
-  // BULK IP CHECKER
   async function handleBulkCheck() {
     setBulkLoading(true);
     setResults([]);
@@ -105,7 +99,6 @@ export default function Home() {
     setBulkLoading(false);
   }
 
-  // Очищаем и вытаскиваем IP при вставке
   function handleBulkInput(e) {
     const text = e.target.value;
     const ipsArr = extractIPs(text);
@@ -139,7 +132,7 @@ export default function Home() {
               Visitor ID: <span style={{ fontFamily: "monospace" }}>{visitorId || "Calculating..."}</span>
             </div>
 
-            {/* --- Компактная сетка с картой --- */}
+            {/* --- Сетка карточек с картой справа --- */}
             <div
               style={{
                 display: "grid",
@@ -158,13 +151,20 @@ export default function Home() {
                   <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData[key] || "-"}</div>
                 </div>
               ))}
-              {/* Карта — занимает 2 строки и 1 колонку справа */}
+              {/* Карта — 2 строки, 1 колонка справа */}
               <div
                 style={{
                   gridRow: "1 / span 2", gridColumn: "4 / span 1",
-                  background: "#fff", border: "2.5px solid #f3f3f3", borderRadius: 13,
-                  display: "flex", flexDirection: "column", alignItems: "center", padding: 11, minHeight: 145,
-                  justifyContent: "center", boxShadow: "0 3px 18px 0 rgba(255,98,0,0.03)"
+                  background: "#fff8f2",
+                  border: "2px solid #ffe0c2",
+                  borderRadius: 13,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: 11,
+                  minHeight: 145,
+                  justifyContent: "center",
+                  boxShadow: "0 2px 8px 0 rgba(246,122,38,0.03)"
                 }}
               >
                 <div style={{ fontWeight: 700, fontSize: 20, color: "#2d2d2d", marginBottom: 2, textAlign: "center" }}>
@@ -324,7 +324,6 @@ export default function Home() {
   );
 }
 
-// --- Стиль для маленьких карточек ---
 const mainCardStyleSmall = {
   background: "#fff8f2",
   border: "2px solid #ffe0c2",
