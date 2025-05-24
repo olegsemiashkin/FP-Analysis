@@ -353,4 +353,9 @@ const tabBtn = active => ({
   letterSpacing: 1,
   fontSize: 13,
   padding: "6px 15px",
- 
+  background: active ? "#f55d2b" : "#fff",
+  color: active ? "#fff" : "#f55d2b",
+  border: "2px solid #f55d2b",
+  borderRadius: 9,
+  cursor: "pointer"
+});
