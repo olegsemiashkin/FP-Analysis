@@ -1,46 +1,8 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-const Map = dynamic(() => import("../components/Map"), { ssr: false });
 
-function PrivacyModal({ open, onClose }) {
-  if (!open) return null;
-  return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
-        background: "rgba(45,45,45,0.25)", zIndex: 1200,
-        display: "flex", alignItems: "center", justifyContent: "center"
-      }}
-    >
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{
-          background: "#fff", padding: "30px 30px 18px 30px", borderRadius: 14,
-          boxShadow: "0 12px 50px 0 rgba(0,0,0,0.17)", maxWidth: 360, width: "90%"
-        }}
-      >
-        <h2 style={{ margin: 0, color: "#e05222", fontSize: 18, fontWeight: 800 }}>
-          Data Collection Notice
-        </h2>
-        <p style={{ margin: "16px 0 24px 0", color: "#523502", fontSize: 15 }}>
-          This website collects technical and IP-related data for analysis and research purposes.<br /><br />
-          All processing is compliant with US, EU (GDPR), and UK data protection laws.<br />
-          By using the service, you consent to the collection of this data.
-        </p>
-        <button
-          style={{
-            background: "#f55d2b", color: "#fff", border: "none", borderRadius: 8,
-            padding: "9px 24px", fontWeight: 700, fontSize: 15, cursor: "pointer"
-          }}
-          onClick={onClose}
-        >
-          OK
-        </button>
-      </div>
-    </div>
-  );
-}
+const Map = dynamic(() => import("../components/Map"), { ssr: false });
+const AmlTab = dynamic(() => import("../components/AmlTab"), { ssr: false });
 
 function parseUA(ua = "") {
   let browser = "-";
@@ -88,7 +50,6 @@ function extractIPs(text) {
 }
 
 export default function Home() {
-  const [privacyOpen, setPrivacyOpen] = useState(true);
   const [tab, setTab] = useState("device");
   const [visitorId, setVisitorId] = useState("");
   const [geo, setGeo] = useState({});
@@ -152,14 +113,12 @@ export default function Home() {
       background: "#fff7f2",
       fontFamily: "'IBM Plex Mono', monospace, Arial"
     }}>
-      {/* Privacy popup modal */}
-      <PrivacyModal open={privacyOpen} onClose={() => setPrivacyOpen(false)} />
-
       <div style={{ maxWidth: 1120, margin: "0 auto", paddingTop: 28 }}>
-        {/* Tabs */}
+        {/* TAB BUTTONS */}
         <div style={{ display: "flex", gap: 8, marginBottom: 25 }}>
           <button onClick={() => setTab("device")} style={tabBtn(tab === "device")}>Device Analysis</button>
           <button onClick={() => setTab("bulk")} style={tabBtn(tab === "bulk")}>Bulk IP Check</button>
+          <button onClick={() => setTab("aml")} style={tabBtn(tab === "aml")}>AML / Crypto</button>
         </div>
 
         {/* DEVICE TAB */}
@@ -175,7 +134,6 @@ export default function Home() {
             }}>
               Visitor ID: <span style={{ fontFamily: "monospace" }}>{visitorId || "Calculating..."}</span>
             </div>
-
             {/* --- Сетка карточек с картой справа --- */}
             <div
               style={{
@@ -250,7 +208,6 @@ export default function Home() {
                 <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData.languages || "-"}</div>
               </div>
             </div>
-
             {/* Device Details Cards */}
             <h3 style={{ color: "#f55d2b", fontWeight: 600, fontSize: 14, marginBottom: 10, marginTop: 10 }}>Device Details</h3>
             <div style={{
@@ -324,65 +281,57 @@ export default function Home() {
             </button>
             <div style={{ marginTop: 14 }}>
               {results.length > 0 && (
-                <div style={{ overflowX: "auto" }}>
-                  <table style={{
-                    width: "100%", background: "#fff7f2", borderRadius: 8,
-                    fontSize: 14, borderCollapse: "separate", borderSpacing: 0, minWidth: 900
-                  }}>
-                    <thead>
-                      <tr>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>IP</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Country</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>ISP</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Proxy</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>VPN</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Tor</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Fraud Score</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Recent Abuse</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Details</th>
+                <table style={{
+                  width: "100%", background: "#fff7f2", borderRadius: 8,
+                  fontSize: 14, borderCollapse: "separate", borderSpacing: 0
+                }}>
+                  <thead>
+                    <tr>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>IP</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Country</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>City</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Proxy</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>VPN</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>TOR</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Org/ISP</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.map((r, i) => (
+                      <tr key={i}>
+                        <td style={{ padding: 8 }}>{r.ip}</td>
+                        <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
+                        <td style={{ padding: 8 }}>{r.data?.city || "-"}</td>
+                        <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                          {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
+                        </td>
+                        <td style={{ padding: 8, color: r.data?.vpn ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                          {typeof r.data?.vpn === "boolean" ? (r.data.vpn ? "Yes" : "No") : "-"}
+                        </td>
+                        <td style={{ padding: 8, color: r.data?.tor ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                          {typeof r.data?.tor === "boolean" ? (r.data.tor ? "Yes" : "No") : "-"}
+                        </td>
+                        <td style={{ padding: 8 }}>{r.data?.org || "-"}</td>
+                        <td style={{ padding: 8 }}>
+                          <details>
+                            <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
+                            <pre style={{
+                              background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2
+                            }}>{JSON.stringify(r.data, null, 2)}</pre>
+                          </details>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {results.map((r, i) => (
-                        <tr key={i}>
-                          <td style={{ padding: 8 }}>{r.ip}</td>
-                          <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
-                          <td style={{ padding: 8 }}>
-                            {r.data?.isp || r.data?.org || r.data?.organization || "-"}
-                          </td>
-                          <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                            {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
-                          </td>
-                          <td style={{ padding: 8, color: r.data?.vpn ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                            {typeof r.data?.vpn === "boolean" ? (r.data.vpn ? "Yes" : "No") : "-"}
-                          </td>
-                          <td style={{ padding: 8, color: r.data?.tor ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                            {typeof r.data?.tor === "boolean" ? (r.data.tor ? "Yes" : "No") : "-"}
-                          </td>
-                          <td style={{ padding: 8, color: r.data?.fraud_score > 60 ? "#e95a16" : "#2b7b2b", fontWeight: 600 }}>
-                            {typeof r.data?.fraud_score === "number" ? r.data.fraud_score : "-"}
-                          </td>
-                          <td style={{ padding: 8, color: r.data?.recent_abuse ? "#e95a16" : "#2b7b2b", fontWeight: 600 }}>
-                            {typeof r.data?.recent_abuse === "boolean" ? (r.data.recent_abuse ? "Yes" : "No") : "-"}
-                          </td>
-                          <td style={{ padding: 8 }}>
-                            <details>
-                              <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
-                              <pre style={{
-                                background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2,
-                                maxHeight: 150, overflowY: "auto"
-                              }}>{JSON.stringify(r.data, null, 2)}</pre>
-                            </details>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
         )}
+
+        {/* AML / CRYPTO TAB */}
+        {tab === "aml" && <AmlTab />}
 
         <div style={{ marginTop: 22, textAlign: "center", color: "#e05222", fontSize: 11, letterSpacing: 1 }}>
           <a href="https://github.com/olegsemiashkin/FP-Analysis" style={{ color: "#e05222" }}>
