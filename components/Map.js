@@ -18,7 +18,7 @@ export default function Map({ lat, lon }) {
     }}>
       <MapContainer
         center={[lat, lon]}
-        zoom={13}
+        zoom={10}
         style={{
           width: '100%',
           height: '100%',
