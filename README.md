@@ -1,6 +1,6 @@
-# FP-Analysis
+# Inspectify
 
-**FP-Analysis** is a web tool for device and IP analysis, based on the FingerprintJS library and open geolocation APIs.  
+**Inspectify** is a web tool for device and IP analysis, based on the FingerprintJS library and open geolocation APIs.  
 It allows you to collect detailed technical information about a device, perform mass IP checks, and visually review visitor data for anti-fraud and security research.
 
 ---
