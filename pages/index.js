@@ -303,7 +303,7 @@ export default function Home() {
                 <tr key={i}>
                   <td style={{ padding: 8 }}>{r.ip}</td>
                   <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
-                  <td style={{ padding: 8 }}>{r.data?.isp || "-"}</td>
+                  {r.data?.isp || r.data?.org || r.data?.organization || "-"}
                   <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
                     {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
                   </td>
