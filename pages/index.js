@@ -280,54 +280,57 @@ export default function Home() {
     </button>
     <div style={{ marginTop: 14 }}>
       {results.length > 0 && (
-        <table style={{
-          width: "100%", background: "#fff7f2", borderRadius: 8,
-          fontSize: 14, borderCollapse: "separate", borderSpacing: 0
-        }}>
-          <thead>
-            <tr>
-              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>IP</th>
-              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Country</th>
-              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>City</th>
-              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Proxy</th>
-              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>VPN</th>
-              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>TOR</th>
-              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Org/ISP</th>
-              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            {results.map((r, i) => (
-              <tr key={i}>
-                <td style={{ padding: 8 }}>{r.ip}</td>
-                <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
-                <td style={{ padding: 8 }}>{r.data?.city || "-"}</td>
-                <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                  {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
-                </td>
-                <td style={{ padding: 8, color: r.data?.vpn ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                  {typeof r.data?.vpn === "boolean" ? (r.data.vpn ? "Yes" : "No") : "-"}
-                </td>
-                <td style={{ padding: 8, color: r.data?.tor ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                  {typeof r.data?.tor === "boolean" ? (r.data.tor ? "Yes" : "No") : "-"}
-                </td>
-                <td style={{ padding: 8 }}>{r.data?.org || "-"}</td>
-                <td style={{ padding: 8 }}>
-                  <details>
-                    <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
-                    <pre style={{
-                      background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2
-                    }}>{JSON.stringify(r.data, null, 2)}</pre>
-                  </details>
-                </td>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{
+            width: "100%", background: "#fff7f2", borderRadius: 8,
+            fontSize: 14, borderCollapse: "separate", borderSpacing: 0, minWidth: 900
+          }}>
+            <thead>
+              <tr>
+                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>IP</th>
+                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Country</th>
+                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>City</th>
+                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Proxy</th>
+                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>VPN</th>
+                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>TOR</th>
+                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Org/ISP</th>
+                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Details</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {results.map((r, i) => (
+                <tr key={i}>
+                  <td style={{ padding: 8 }}>{r.ip}</td>
+                  <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
+                  <td style={{ padding: 8 }}>{r.data?.city || "-"}</td>
+                  <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                    {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
+                  </td>
+                  <td style={{ padding: 8, color: r.data?.vpn ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                    {typeof r.data?.vpn === "boolean" ? (r.data.vpn ? "Yes" : "No") : "-"}
+                  </td>
+                  <td style={{ padding: 8, color: r.data?.tor ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                    {typeof r.data?.tor === "boolean" ? (r.data.tor ? "Yes" : "No") : "-"}
+                  </td>
+                  <td style={{ padding: 8 }}>{r.data?.org || "-"}</td>
+                  <td style={{ padding: 8 }}>
+                    <details>
+                      <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
+                      <pre style={{
+                        background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2
+                      }}>{JSON.stringify(r.data, null, 2)}</pre>
+                    </details>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   </div>
 )}
+
 
 
         <div style={{ marginTop: 22, textAlign: "center", color: "#e05222", fontSize: 11, letterSpacing: 1 }}>
