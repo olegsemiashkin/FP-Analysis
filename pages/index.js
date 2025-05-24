@@ -252,84 +252,113 @@ export default function Home() {
           </div>
         )}
 
-      {/* BULK TAB */}
-{tab === "bulk" && (
-  <div style={{
-    background: "#fff", borderRadius: 14, boxShadow: "0 8px 30px 0 rgba(246, 122, 38, 0.13)", padding: 23
-  }}>
-    <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 18, marginBottom: 13 }}>Bulk IP Check</h2>
-    <textarea
-      rows={4}
-      style={{
-        width: "100%", resize: "vertical", borderRadius: 8, border: "1px solid #fdad60",
-        padding: 8, fontSize: 12, marginBottom: 7, fontFamily: "inherit"
-      }}
-      value={ips}
-      onChange={handleBulkInput}
-      placeholder="Paste any text or list of IPs — will be extracted automatically"
-    />
-    <button
-      onClick={handleBulkCheck}
-      disabled={bulkLoading || !ips.trim()}
-      style={{
-        background: "#f55d2b", color: "#fff", border: 0, borderRadius: 8,
-        padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: bulkLoading ? "wait" : "pointer",
-        marginBottom: 10, marginTop: 3
-      }}>
-      {bulkLoading ? "Checking..." : "Check IPs"}
-    </button>
-    <div style={{ marginTop: 14 }}>
-      {results.length > 0 && (
-        <div style={{ overflowX: "auto" }}>
-          <table style={{
-            width: "100%", background: "#fff7f2", borderRadius: 8,
-            fontSize: 14, borderCollapse: "separate", borderSpacing: 0, minWidth: 900
+     {/* BULK TAB */}
+        {tab === "bulk" && (
+          <div style={{
+            background: "#fff", borderRadius: 14, boxShadow: "0 8px 30px 0 rgba(246, 122, 38, 0.13)", padding: 23
           }}>
-            <thead>
-              <tr>
-                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>IP</th>
-                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Country</th>
-                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>City</th>
-                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Proxy</th>
-                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>VPN</th>
-                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>TOR</th>
-                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Org/ISP</th>
-                <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Details</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((r, i) => (
-                <tr key={i}>
-                  <td style={{ padding: 8 }}>{r.ip}</td>
-                  <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
-                  <td style={{ padding: 8 }}>{r.data?.city || "-"}</td>
-                  <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                    {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
-                  </td>
-                  <td style={{ padding: 8, color: r.data?.vpn ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                    {typeof r.data?.vpn === "boolean" ? (r.data.vpn ? "Yes" : "No") : "-"}
-                  </td>
-                  <td style={{ padding: 8, color: r.data?.tor ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                    {typeof r.data?.tor === "boolean" ? (r.data.tor ? "Yes" : "No") : "-"}
-                  </td>
-                  <td style={{ padding: 8 }}>{r.data?.org || "-"}</td>
-                  <td style={{ padding: 8 }}>
-                    <details>
-                      <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
-                      <pre style={{
-                        background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2
-                      }}>{JSON.stringify(r.data, null, 2)}</pre>
-                    </details>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  </div>
-)}
+            <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 18, marginBottom: 13 }}>Bulk IP Check</h2>
+            <textarea
+              rows={4}
+              style={{
+                width: "100%", resize: "vertical", borderRadius: 8, border: "1px solid #fdad60",
+                padding: 8, fontSize: 12, marginBottom: 7, fontFamily: "inherit"
+              }}
+              value={ips}
+              onChange={handleBulkInput}
+              placeholder="Paste any text or list of IPs — will be extracted automatically"
+            />
+            <button
+              onClick={handleBulkCheck}
+              disabled={bulkLoading || !ips.trim()}
+              style={{
+                background: "#f55d2b", color: "#fff", border: 0, borderRadius: 8,
+                padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: bulkLoading ? "wait" : "pointer",
+                marginBottom: 10, marginTop: 3
+              }}>
+              {bulkLoading ? "Checking..." : "Check IPs"}
+            </button>
+            <div style={{ marginTop: 14 }}>
+              {results.length > 0 && (
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{
+                    minWidth: 900, width: "100%",
+                    background: "#fff7f2", borderRadius: 12, borderSpacing: 0,
+                    fontSize: 14, textAlign: "left", margin: 0, boxShadow: "0 2px 8px #fbeee6"
+                  }}>
+                    <thead>
+                      <tr>
+                        <th style={{ color: "#f55d2b", padding: 8 }}>IP</th>
+                        <th style={{ color: "#f55d2b", padding: 8 }}>Country</th>
+                        <th style={{ color: "#f55d2b", padding: 8 }}>ISP</th>
+                        <th style={{ color: "#f55d2b", padding: 8 }}>Proxy</th>
+                        <th style={{ color: "#f55d2b", padding: 8 }}>VPN</th>
+                        <th style={{ color: "#f55d2b", padding: 8 }}>Tor</th>
+                        <th style={{ color: "#f55d2b", padding: 8 }}>Fraud Score</th>
+                        <th style={{ color: "#f55d2b", padding: 8 }}>Recent Abuse</th>
+                        <th style={{ color: "#f55d2b", padding: 8 }}>Type</th>
+                        <th style={{ color: "#f55d2b", padding: 8 }}>Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {results.map((r, i) => (
+                        <tr key={i}>
+                          <td style={{ padding: 8 }}>{r.ip}</td>
+                          <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
+                          <td style={{ padding: 8 }}>{r.data?.isp || r.data?.org || "-"}</td>
+                          <td style={{
+                            padding: 8,
+                            color: r.data?.proxy ? "#e95a16" : "#2b7b2b",
+                            fontWeight: 600
+                          }}>
+                            {r.data?.proxy === true ? "Yes" : r.data?.proxy === false ? "No" : "-"}
+                          </td>
+                          <td style={{
+                            padding: 8,
+                            color: r.data?.vpn ? "#e95a16" : "#2b7b2b",
+                            fontWeight: 600
+                          }}>
+                            {r.data?.vpn === true ? "Yes" : r.data?.vpn === false ? "No" : "-"}
+                          </td>
+                          <td style={{
+                            padding: 8,
+                            color: r.data?.tor ? "#e95a16" : "#2b7b2b",
+                            fontWeight: 600
+                          }}>
+                            {r.data?.tor === true ? "Yes" : r.data?.tor === false ? "No" : "-"}
+                          </td>
+                          <td style={{
+                            padding: 8,
+                            color: r.data?.fraud_score > 70 ? "#e95a16" : (r.data?.fraud_score > 30 ? "#f59e42" : "#2b7b2b"),
+                            fontWeight: 700
+                          }}>
+                            {typeof r.data?.fraud_score === "number" ? r.data.fraud_score : "-"}
+                          </td>
+                          <td style={{
+                            padding: 8,
+                            color: r.data?.recent_abuse ? "#e95a16" : "#2b7b2b",
+                            fontWeight: 600
+                          }}>
+                            {r.data?.recent_abuse === true ? "Yes" : r.data?.recent_abuse === false ? "No" : "-"}
+                          </td>
+                          <td style={{ padding: 8 }}>{r.data?.connection_type || "-"}</td>
+                          <td style={{ padding: 8 }}>
+                            <details>
+                              <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
+                              <pre style={{
+                                background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2, maxWidth: 360, overflowX: "auto"
+                              }}>{JSON.stringify(r.data, null, 2)}</pre>
+                            </details>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
 
 
