@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 const Map = dynamic(() => import("../components/Map"), { ssr: false });
 
-// Новый парсер userAgent: всегда есть данные
+// Парсер userAgent: всегда есть данные
 function parseUA(ua = "") {
   let browser = "-";
   let os = "-";
@@ -41,6 +41,14 @@ const deviceParams = [
   { key: "hardwareConcurrency", label: "CPU Cores" },
   { key: "deviceMemory", label: "Device RAM" },
 ];
+
+// Функция для извлечения IP-адресов из любого текста
+function extractIPs(text) {
+  // IPv4 only, если нужны IPv6 — добавим!
+  const ipRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
+  const ips = text.match(ipRegex) || [];
+  return Array.from(new Set(ips));
+}
 
 export default function Home() {
   const [tab, setTab] = useState("device");
@@ -83,7 +91,7 @@ export default function Home() {
     });
   }, []);
 
-  // BULK IP CHECKER (оставь если используешь bulk checker)
+  // BULK IP CHECKER
   async function handleBulkCheck() {
     setBulkLoading(true);
     setResults([]);
@@ -97,15 +105,22 @@ export default function Home() {
     setBulkLoading(false);
   }
 
+  // Очищаем и вытаскиваем IP при вставке
+  function handleBulkInput(e) {
+    const text = e.target.value;
+    const ipsArr = extractIPs(text);
+    setIps(ipsArr.join("\n"));
+  }
+
   return (
     <div style={{
       minHeight: "100vh",
       background: "#fff7f2",
       fontFamily: "'IBM Plex Mono', monospace, Arial"
     }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", paddingTop: 36 }}>
+      <div style={{ maxWidth: 1120, margin: "0 auto", paddingTop: 28 }}>
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 25 }}>
           <button onClick={() => setTab("device")} style={tabBtn(tab === "device")}>Device Analysis</button>
           <button onClick={() => setTab("bulk")} style={tabBtn(tab === "bulk")}>Bulk IP Check</button>
         </div>
@@ -113,66 +128,66 @@ export default function Home() {
         {/* DEVICE TAB */}
         {tab === "device" && (
           <div style={{
-            background: "#fff", borderRadius: 18, boxShadow: "0 10px 32px 0 rgba(246, 122, 38, 0.10)",
-            padding: 40, marginBottom: 40
+            background: "#fff", borderRadius: 15, boxShadow: "0 6px 18px 0 rgba(246, 122, 38, 0.10)",
+            padding: 23, marginBottom: 28
           }}>
-            <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 26, marginBottom: 20 }}>Identification</h2>
+            <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 22, marginBottom: 16 }}>Identification</h2>
             <div style={{
-              background: "#fff3e7", border: "2px dashed #f55d2b", borderRadius: 10, padding: "18px 24px", marginBottom: 30,
-              fontSize: 22, fontWeight: 700, color: "#f55d2b", letterSpacing: 1
+              background: "#fff3e7", border: "2px dashed #f55d2b", borderRadius: 9, padding: "12px 18px", marginBottom: 20,
+              fontSize: 16, fontWeight: 700, color: "#f55d2b", letterSpacing: 1
             }}>
               Visitor ID: <span style={{ fontFamily: "monospace" }}>{visitorId || "Calculating..."}</span>
             </div>
 
-            {/* --- Новая аккуратная сетка с картой 1-в-1 как в демо --- */}
+            {/* --- Компактная сетка с картой --- */}
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(4, 1fr)",
                 gridTemplateRows: "repeat(2, 1fr)",
-                gap: 22,
-                marginBottom: 32,
+                gap: 13,
+                marginBottom: 20,
                 alignItems: "stretch",
-                minHeight: 250
+                minHeight: 145
               }}
             >
               {/* Левая часть: карточки */}
               {mainCards.slice(0, 3).map(({ key, label }) => (
-                <div key={key} style={mainCardStyle}>
-                  <div style={mainCardLabel}>{label}</div>
-                  <div style={{ fontWeight: 700, fontSize: 23, marginTop: 7 }}>{mainData[key] || "-"}</div>
+                <div key={key} style={mainCardStyleSmall}>
+                  <div style={mainCardLabelSmall}>{label}</div>
+                  <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData[key] || "-"}</div>
                 </div>
               ))}
               {/* Карта — занимает 2 строки и 1 колонку справа */}
               <div
                 style={{
                   gridRow: "1 / span 2", gridColumn: "4 / span 1",
-                  background: "#fff", border: "2.5px solid #f3f3f3", borderRadius: 16,
-                  display: "flex", flexDirection: "column", alignItems: "center", padding: 17, minHeight: 250,
+                  background: "#fff", border: "2.5px solid #f3f3f3", borderRadius: 13,
+                  display: "flex", flexDirection: "column", alignItems: "center", padding: 11, minHeight: 145,
                   justifyContent: "center", boxShadow: "0 3px 18px 0 rgba(255,98,0,0.03)"
                 }}
               >
-                <div style={{ fontWeight: 700, fontSize: 29, color: "#2d2d2d", marginBottom: 3, textAlign: "center" }}>
-                  Geolocation <span style={{ fontSize: 20, color: "#f55d2b" }}>↗</span>
+                <div style={{ fontWeight: 700, fontSize: 20, color: "#2d2d2d", marginBottom: 2, textAlign: "center" }}>
+                  Geolocation <span style={{ fontSize: 14, color: "#f55d2b" }}>↗</span>
                 </div>
-                <div style={{ fontSize: 19, color: "#ad5a11", marginBottom: 12, textAlign: "center" }}>
+                <div style={{ fontSize: 13, color: "#ad5a11", marginBottom: 7, textAlign: "center" }}>
                   {geo?.city}, {geo?.region},<br />{geo?.country_name}
                 </div>
                 <div
                   style={{
-                    width: 300,
-                    height: 140,
-                    borderRadius: 12,
-                    border: "3px solid #3396f3",
+                    width: 170,
+                    height: 80,
+                    borderRadius: 8,
+                    border: "2px solid #3396f3",
                     overflow: "hidden",
-                    marginTop: 8,
+                    marginTop: 5,
                     boxShadow: "0 2px 8px 0 rgba(45,143,222,0.09)"
                   }}
                 >
                   {geo && Number(geo.latitude) && Number(geo.longitude) ? (
                     <Map lat={Number(geo.latitude)} lon={Number(geo.longitude)} />
                   ) : (
-                    <div style={{ color: "#d15000", padding: 40, textAlign: "center", fontWeight: 600 }}>
+                    <div style={{ color: "#d15000", padding: 22, textAlign: "center", fontWeight: 600 }}>
                       No map
                     </div>
                   )}
@@ -180,22 +195,22 @@ export default function Home() {
               </div>
               {/* Вторая строка карточек */}
               {mainCards.slice(3, 7).map(({ key, label }) => (
-                <div key={key} style={mainCardStyle}>
-                  <div style={mainCardLabel}>{label}</div>
-                  <div style={{ fontWeight: 700, fontSize: 23, marginTop: 7 }}>{mainData[key] || "-"}</div>
+                <div key={key} style={mainCardStyleSmall}>
+                  <div style={mainCardLabelSmall}>{label}</div>
+                  <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData[key] || "-"}</div>
                 </div>
               ))}
-              {/* Последняя ячейка: Languages (можно объединить ячейки, если хочешь) */}
-              <div style={{ ...mainCardStyle, gridColumn: "2 / span 2" }}>
-                <div style={mainCardLabel}>Languages</div>
-                <div style={{ fontWeight: 700, fontSize: 23, marginTop: 7 }}>{mainData.languages || "-"}</div>
+              {/* Последняя ячейка: Languages */}
+              <div style={{ ...mainCardStyleSmall, gridColumn: "2 / span 2" }}>
+                <div style={mainCardLabelSmall}>Languages</div>
+                <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData.languages || "-"}</div>
               </div>
             </div>
 
             {/* Device Details Cards */}
-            <h3 style={{ color: "#f55d2b", fontWeight: 600, fontSize: 19, marginBottom: 16, marginTop: 18 }}>Device Details</h3>
+            <h3 style={{ color: "#f55d2b", fontWeight: 600, fontSize: 14, marginBottom: 10, marginTop: 10 }}>Device Details</h3>
             <div style={{
-              display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18, marginBottom: 22
+              display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 12
             }}>
               {deviceParams.map(({ key, label }) => {
                 const val = details?.[key]?.value;
@@ -205,13 +220,13 @@ export default function Home() {
                 else if (typeof val !== "undefined") displayValue = String(val);
                 return (
                   <div key={key} style={{
-                    background: "#fff", border: "1.5px solid #ffe0c2", borderRadius: 8,
-                    padding: "13px 15px", fontSize: 15, fontWeight: 600,
+                    background: "#fff", border: "1.2px solid #ffe0c2", borderRadius: 8,
+                    padding: "8px 8px", fontSize: 12, fontWeight: 600,
                     color: "#b45309", boxShadow: "0 1.5px 6px 0 rgba(246,122,38,0.03)"
                   }}>
-                    <div style={{ color: "#f55d2b", fontSize: 13, fontWeight: 700, marginBottom: 2 }}>{label}</div>
-                    <div style={{ fontSize: 15, wordBreak: "break-word" }}>
-                      {displayValue.length > 100 ? displayValue.slice(0, 99) + "..." : displayValue}
+                    <div style={{ color: "#f55d2b", fontSize: 11, fontWeight: 700, marginBottom: 2 }}>{label}</div>
+                    <div style={{ fontSize: 12, wordBreak: "break-word" }}>
+                      {displayValue.length > 80 ? displayValue.slice(0, 77) + "..." : displayValue}
                     </div>
                   </div>
                 );
@@ -219,8 +234,8 @@ export default function Home() {
             </div>
             <button
               style={{
-                marginTop: 10, background: "#fff3e7", color: "#e05222", border: "1.5px solid #ffcc99",
-                borderRadius: 8, padding: "7px 24px", fontWeight: 600, cursor: "pointer", fontSize: 15
+                marginTop: 6, background: "#fff3e7", color: "#e05222", border: "1px solid #ffcc99",
+                borderRadius: 7, padding: "6px 15px", fontWeight: 600, cursor: "pointer", fontSize: 12
               }}
               onClick={() => setShowAll(v => !v)}
             >
@@ -228,8 +243,8 @@ export default function Home() {
             </button>
             {showAll && (
               <pre style={{
-                background: "#fff8f2", border: "1.5px solid #ffe0c2", borderRadius: 9,
-                padding: 15, marginTop: 12, fontSize: 13, color: "#6a3403", whiteSpace: "pre-wrap"
+                background: "#fff8f2", border: "1px solid #ffe0c2", borderRadius: 9,
+                padding: 10, marginTop: 7, fontSize: 11, color: "#6a3403", whiteSpace: "pre-wrap"
               }}>
                 {JSON.stringify(details, null, 2)}
               </pre>
@@ -240,53 +255,53 @@ export default function Home() {
         {/* BULK TAB */}
         {tab === "bulk" && (
           <div style={{
-            background: "#fff", borderRadius: 18, boxShadow: "0 8px 30px 0 rgba(246, 122, 38, 0.13)", padding: 40
+            background: "#fff", borderRadius: 14, boxShadow: "0 8px 30px 0 rgba(246, 122, 38, 0.13)", padding: 23
           }}>
-            <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 24, marginBottom: 20 }}>Bulk IP Check</h2>
+            <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 18, marginBottom: 13 }}>Bulk IP Check</h2>
             <textarea
               rows={4}
               style={{
-                width: "100%", resize: "vertical", borderRadius: 10, border: "1.5px solid #fdad60",
-                padding: 14, fontSize: 16, marginBottom: 10, fontFamily: "inherit"
+                width: "100%", resize: "vertical", borderRadius: 8, border: "1px solid #fdad60",
+                padding: 8, fontSize: 12, marginBottom: 7, fontFamily: "inherit"
               }}
               value={ips}
-              onChange={e => setIps(e.target.value)}
-              placeholder="Enter IP addresses separated by comma or newline"
+              onChange={handleBulkInput}
+              placeholder="Paste any text or list of IPs — will be extracted automatically"
             />
             <button
               onClick={handleBulkCheck}
               disabled={bulkLoading || !ips.trim()}
               style={{
-                background: "#f55d2b", color: "#fff", border: 0, borderRadius: 10,
-                padding: "10px 34px", fontWeight: 700, fontSize: 16, cursor: bulkLoading ? "wait" : "pointer",
-                marginBottom: 18, marginTop: 5
+                background: "#f55d2b", color: "#fff", border: 0, borderRadius: 8,
+                padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: bulkLoading ? "wait" : "pointer",
+                marginBottom: 10, marginTop: 3
               }}>
               {bulkLoading ? "Checking..." : "Check IPs"}
             </button>
-            <div style={{ marginTop: 24 }}>
+            <div style={{ marginTop: 14 }}>
               {results.length > 0 && (
-                <table style={{ width: "100%", fontSize: 15, background: "#fff7f2", borderRadius: 10 }}>
+                <table style={{ width: "100%", fontSize: 12, background: "#fff7f2", borderRadius: 8 }}>
                   <thead>
                     <tr>
-                      <th style={{ color: "#f55d2b", padding: 8 }}>IP</th>
-                      <th style={{ color: "#f55d2b", padding: 8 }}>Country</th>
-                      <th style={{ color: "#f55d2b", padding: 8 }}>City</th>
-                      <th style={{ color: "#f55d2b", padding: 8 }}>Org/ISP</th>
-                      <th style={{ color: "#f55d2b", padding: 8 }}>Details</th>
+                      <th style={{ color: "#f55d2b", padding: 4 }}>IP</th>
+                      <th style={{ color: "#f55d2b", padding: 4 }}>Country</th>
+                      <th style={{ color: "#f55d2b", padding: 4 }}>City</th>
+                      <th style={{ color: "#f55d2b", padding: 4 }}>Org/ISP</th>
+                      <th style={{ color: "#f55d2b", padding: 4 }}>Details</th>
                     </tr>
                   </thead>
                   <tbody>
                     {results.map((r, i) => (
                       <tr key={i}>
-                        <td style={{ padding: 7 }}>{r.ip}</td>
-                        <td style={{ padding: 7 }}>{r.data?.country || "-"}</td>
-                        <td style={{ padding: 7 }}>{r.data?.city || "-"}</td>
-                        <td style={{ padding: 7 }}>{r.data?.org || "-"}</td>
-                        <td style={{ padding: 7 }}>
+                        <td style={{ padding: 4 }}>{r.ip}</td>
+                        <td style={{ padding: 4 }}>{r.data?.country || "-"}</td>
+                        <td style={{ padding: 4 }}>{r.data?.city || "-"}</td>
+                        <td style={{ padding: 4 }}>{r.data?.org || "-"}</td>
+                        <td style={{ padding: 4 }}>
                           <details>
                             <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
                             <pre style={{
-                              background: "#fff4e7", borderRadius: 7, padding: 7, fontSize: 12, marginTop: 4
+                              background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2
                             }}>{JSON.stringify(r.data, null, 2)}</pre>
                           </details>
                         </td>
@@ -299,7 +314,7 @@ export default function Home() {
           </div>
         )}
 
-        <div style={{ marginTop: 32, textAlign: "center", color: "#e05222", fontSize: 16, letterSpacing: 1 }}>
+        <div style={{ marginTop: 22, textAlign: "center", color: "#e05222", fontSize: 11, letterSpacing: 1 }}>
           <a href="https://github.com/olegsemiashkin/FP-Analysis" style={{ color: "#e05222" }}>
             GitHub Project
           </a>
@@ -309,38 +324,33 @@ export default function Home() {
   );
 }
 
-// --- Стиль для карточек ---
-const mainCardStyle = {
+// --- Стиль для маленьких карточек ---
+const mainCardStyleSmall = {
   background: "#fff8f2",
   border: "2px solid #ffe0c2",
-  borderRadius: 13,
-  padding: "19px 24px",
-  fontSize: 18,
+  borderRadius: 10,
+  padding: "11px 12px",
+  fontSize: 13,
   color: "#b45309",
   fontWeight: 600,
   boxShadow: "0 2px 8px 0 rgba(246,122,38,0.03)",
-  minHeight: 85,
+  minHeight: 40,
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
 };
 
-const mainCardLabel = {
+const mainCardLabelSmall = {
   color: "#f55d2b",
-  fontSize: 19,
+  fontSize: 13,
   fontWeight: 800,
-  marginBottom: 3,
+  marginBottom: 2,
   fontFamily: "inherit"
 };
 
 const tabBtn = active => ({
   fontWeight: 600,
   letterSpacing: 1,
-  fontSize: 16,
-  padding: "10px 30px",
-  background: active ? "#f55d2b" : "#fff",
-  color: active ? "#fff" : "#f55d2b",
-  border: "2.3px solid #f55d2b",
-  borderRadius: 12,
-  cursor: "pointer"
-});
+  fontSize: 13,
+  padding: "6px 15px",
+ 
