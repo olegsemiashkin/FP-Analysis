@@ -252,67 +252,83 @@ export default function Home() {
           </div>
         )}
 
-        {/* BULK TAB */}
-        {tab === "bulk" && (
-          <div style={{
-            background: "#fff", borderRadius: 14, boxShadow: "0 8px 30px 0 rgba(246, 122, 38, 0.13)", padding: 23
-          }}>
-            <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 18, marginBottom: 13 }}>Bulk IP Check</h2>
-            <textarea
-              rows={4}
-              style={{
-                width: "100%", resize: "vertical", borderRadius: 8, border: "1px solid #fdad60",
-                padding: 8, fontSize: 12, marginBottom: 7, fontFamily: "inherit"
-              }}
-              value={ips}
-              onChange={handleBulkInput}
-              placeholder="Paste any text or list of IPs — will be extracted automatically"
-            />
-            <button
-              onClick={handleBulkCheck}
-              disabled={bulkLoading || !ips.trim()}
-              style={{
-                background: "#f55d2b", color: "#fff", border: 0, borderRadius: 8,
-                padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: bulkLoading ? "wait" : "pointer",
-                marginBottom: 10, marginTop: 3
-              }}>
-              {bulkLoading ? "Checking..." : "Check IPs"}
-            </button>
-            <div style={{ marginTop: 14 }}>
-              {results.length > 0 && (
-                <table style={{ width: "100%", fontSize: 12, background: "#fff7f2", borderRadius: 8 }}>
-                  <thead>
-                    <tr>
-                      <th style={{ color: "#f55d2b", padding: 4 }}>IP</th>
-                      <th style={{ color: "#f55d2b", padding: 4 }}>Country</th>
-                      <th style={{ color: "#f55d2b", padding: 4 }}>City</th>
-                      <th style={{ color: "#f55d2b", padding: 4 }}>Org/ISP</th>
-                      <th style={{ color: "#f55d2b", padding: 4 }}>Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {results.map((r, i) => (
-                      <tr key={i}>
-                        <td style={{ padding: 4 }}>{r.ip}</td>
-                        <td style={{ padding: 4 }}>{r.data?.country || "-"}</td>
-                        <td style={{ padding: 4 }}>{r.data?.city || "-"}</td>
-                        <td style={{ padding: 4 }}>{r.data?.org || "-"}</td>
-                        <td style={{ padding: 4 }}>
-                          <details>
-                            <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
-                            <pre style={{
-                              background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2
-                            }}>{JSON.stringify(r.data, null, 2)}</pre>
-                          </details>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
-        )}
+      {/* BULK TAB */}
+{tab === "bulk" && (
+  <div style={{
+    background: "#fff", borderRadius: 14, boxShadow: "0 8px 30px 0 rgba(246, 122, 38, 0.13)", padding: 23
+  }}>
+    <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 18, marginBottom: 13 }}>Bulk IP Check</h2>
+    <textarea
+      rows={4}
+      style={{
+        width: "100%", resize: "vertical", borderRadius: 8, border: "1px solid #fdad60",
+        padding: 8, fontSize: 12, marginBottom: 7, fontFamily: "inherit"
+      }}
+      value={ips}
+      onChange={handleBulkInput}
+      placeholder="Paste any text or list of IPs — will be extracted automatically"
+    />
+    <button
+      onClick={handleBulkCheck}
+      disabled={bulkLoading || !ips.trim()}
+      style={{
+        background: "#f55d2b", color: "#fff", border: 0, borderRadius: 8,
+        padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: bulkLoading ? "wait" : "pointer",
+        marginBottom: 10, marginTop: 3
+      }}>
+      {bulkLoading ? "Checking..." : "Check IPs"}
+    </button>
+    <div style={{ marginTop: 14 }}>
+      {results.length > 0 && (
+        <table style={{
+          width: "100%", background: "#fff7f2", borderRadius: 8,
+          fontSize: 14, borderCollapse: "separate", borderSpacing: 0
+        }}>
+          <thead>
+            <tr>
+              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>IP</th>
+              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Country</th>
+              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>City</th>
+              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Proxy</th>
+              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>VPN</th>
+              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>TOR</th>
+              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Org/ISP</th>
+              <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((r, i) => (
+              <tr key={i}>
+                <td style={{ padding: 8 }}>{r.ip}</td>
+                <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
+                <td style={{ padding: 8 }}>{r.data?.city || "-"}</td>
+                <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                  {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
+                </td>
+                <td style={{ padding: 8, color: r.data?.vpn ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                  {typeof r.data?.vpn === "boolean" ? (r.data.vpn ? "Yes" : "No") : "-"}
+                </td>
+                <td style={{ padding: 8, color: r.data?.tor ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                  {typeof r.data?.tor === "boolean" ? (r.data.tor ? "Yes" : "No") : "-"}
+                </td>
+                <td style={{ padding: 8 }}>{r.data?.org || "-"}</td>
+                <td style={{ padding: 8 }}>
+                  <details>
+                    <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
+                    <pre style={{
+                      background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2
+                    }}>{JSON.stringify(r.data, null, 2)}</pre>
+                  </details>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  </div>
+)}
+
 
         <div style={{ marginTop: 22, textAlign: "center", color: "#e05222", fontSize: 11, letterSpacing: 1 }}>
           <a href="https://github.com/olegsemiashkin/FP-Analysis" style={{ color: "#e05222" }}>
