@@ -1,43 +1,42 @@
-import { useState } from "react";
+// pages/ip-bulk.js
 
-export default function IpBulk() {
-  const [ips, setIps] = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+import React from 'react';
 
-  async function handleCheck() {
-    setLoading(true);
-    const res = await fetch("/api/bulk-ip", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ips: ips.split(/[\s,]+/).filter(Boolean) }),
-    });
-    const data = await res.json();
-    setResults(data.results);
-    setLoading(false);
-  }
-
+export default function BulkIP({ ips }) {
   return (
-    <main style={{ padding: 30 }}>
-      <h1>Bulk IP Checker</h1>
-      <textarea
-        rows={6}
-        style={{ width: "100%" }}
-        value={ips}
-        onChange={e => setIps(e.target.value)}
-        placeholder="Вставьте список IP через запятую или с новой строки"
-      />
-      <br />
-      <button onClick={handleCheck} disabled={loading}>
-        {loading ? "Проверяем..." : "Проверить IP"}
-      </button>
-      <ul>
-        {results.map((r, i) => (
-          <li key={i}>
-            {r.ip}: {r.data ? JSON.stringify(r.data) : "Ошибка/Не найдено"}
-          </li>
-        ))}
-      </ul>
-    </main>
+    <div style={{ margin: "0 auto", maxWidth: 1200 }}>
+      <table className="bulk-table">
+        <thead>
+          <tr>
+            <th>IP</th>
+            <th>Country</th>
+            <th>City</th>
+            <th>VPN/Proxy</th>
+            <th>Org/ISP</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ips && ips.length ? ips.map((ip, i) => (
+            <tr key={ip.address || i}>
+              <td>{ip.address}</td>
+              <td>{ip.country}</td>
+              <td>{ip.city}</td>
+              <td style={{ color: (ip.proxy || ip.vpn) ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                {(ip.proxy || ip.vpn) ? (ip.proxy ? "Proxy" : "VPN") : "Clean"}
+              </td>
+              <td>{ip.isp}</td>
+              <td>
+                <a href={`/details/${ip.address}`} style={{ color: "#e95a16" }}>▶ Details</a>
+              </td>
+            </tr>
+          )) : (
+            <tr>
+              <td colSpan={6}>No data</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 }
