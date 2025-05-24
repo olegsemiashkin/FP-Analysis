@@ -1,10 +1,12 @@
+// pages/ip-bulk.js
+
 import React from 'react';
 
 export default function BulkIP({ ips }) {
   return (
     <div style={{ margin: "0 auto", maxWidth: "98vw", padding: 0 }}>
       <div style={{ overflowX: "auto" }}>
-        <table className="bulk-table" style={{ minWidth: 1050, width: "100%", borderCollapse: "separate" }}>
+        <table className="bulk-table" style={{ minWidth: 1300, width: "100%", borderCollapse: "separate" }}>
           <colgroup>
             <col style={{ width: "15%" }} />   {/* IP */}
             <col style={{ width: "11%" }} />   {/* Country */}
