@@ -108,6 +108,67 @@ export default function Home() {
   }
 
   return (
+    return (
+  <>
+    {showConsent && (
+      <div style={{
+        position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", zIndex: 9999,
+        background: "rgba(40, 25, 14, 0.13)", display: "flex", alignItems: "center", justifyContent: "center"
+      }}
+        onClick={handleConsentAccept}
+      >
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            background: "#fff7f2",
+            border: "2px solid #f55d2b",
+            borderRadius: 15,
+            boxShadow: "0 8px 32px 0 rgba(246, 122, 38, 0.16)",
+            padding: "30px 40px",
+            maxWidth: 440,
+            width: "90vw",
+            color: "#ba4107",
+            fontSize: 15,
+            fontWeight: 600,
+            textAlign: "center",
+            letterSpacing: 0.3,
+          }}>
+          <div style={{ fontSize: 21, color: "#ea580c", fontWeight: 900, marginBottom: 11 }}>
+            Data Collection Notice
+          </div>
+          <div style={{ marginBottom: 13, color: "#b45309" }}>
+            All processing is compliant with&nbsp;
+            <a href="https://gdpr.eu/" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline" }}>
+              EU GDPR
+            </a>
+            ,&nbsp;
+            <a href="https://ico.org.uk/for-organisations/guide-to-data-protection/" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline" }}>
+              UK Data Protection
+            </a>
+            , and&nbsp;
+            <a href="https://www.ftc.gov/business-guidance/privacy-security" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline" }}>
+              US Privacy Laws
+            </a>
+            .<br />
+            By using the service, you consent to the collection and analysis of technical data.
+          </div>
+          <button
+            onClick={handleConsentAccept}
+            style={{
+              background: "#f55d2b", color: "#fff", border: "none", borderRadius: 7,
+              fontWeight: 700, padding: "9px 22px", fontSize: 16, marginTop: 7, cursor: "pointer"
+            }}>
+            I Agree
+          </button>
+        </div>
+      </div>
+    )}
+
+    <div style={{ minHeight: "100vh", background: "#fff7f2", fontFamily: "'IBM Plex Mono', monospace, Arial" }}>
+      {/* ...весь остальной код страницы... */}
+    </div>
+  </>
+)
     <div style={{
       minHeight: "100vh",
       background: "#fff7f2",
