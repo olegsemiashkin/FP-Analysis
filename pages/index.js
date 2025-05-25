@@ -126,58 +126,58 @@ export default function Home() {
   return (
     <>
       {showConsent && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", zIndex: 9999,
-          background: "rgba(40, 25, 14, 0.13)", display: "flex", alignItems: "center", justifyContent: "center"
-        }}
-          onClick={handleConsentAccept}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              background: "#fff7f2",
-              border: "2px solid #f55d2b",
-              borderRadius: 15,
-              boxShadow: "0 8px 32px 0 rgba(246, 122, 38, 0.16)",
-              padding: "30px 40px",
-              maxWidth: 440,
-              width: "90vw",
-              color: "#ba4107",
-              fontSize: 15,
-              fontWeight: 600,
-              textAlign: "center",
-              letterSpacing: 0.3,
-            }}>
-            <div style={{ fontSize: 21, color: "#ea580c", fontWeight: 900, marginBottom: 11 }}>
-              Data Collection Notice
-            </div>
-            <div style={{ marginBottom: 13, color: "#b45309" }}>
-              All processing is compliant with&nbsp;
-              <a href="https://gdpr.eu/" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline" }}>
-                EU GDPR
-              </a>
-              ,&nbsp;
-              <a href="https://ico.org.uk/for-organisations/guide-to-data-protection/" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline" }}>
-                UK Data Protection
-              </a>
-              , and&nbsp;
-              <a href="https://www.ftc.gov/business-guidance/privacy-security" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline" }}>
-                US Privacy Laws
-              </a>
-              .<br />
-              By using the service, you consent to the collection and analysis of technical data.
-            </div>
-            <button
-              onClick={handleConsentAccept}
-              style={{
-                background: "#f55d2b", color: "#fff", border: "none", borderRadius: 7,
-                fontWeight: 700, padding: "9px 22px", fontSize: 16, marginTop: 7, cursor: "pointer"
-              }}>
-              I Agree
-            </button>
-          </div>
-        </div>
-      )}
+  <div style={{
+    position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", zIndex: 9999,
+    background: "rgba(246,122,38, 0.10)", display: "flex", alignItems: "center", justifyContent: "center"
+  }}>
+    <div
+      onClick={e => e.stopPropagation()}
+      style={{
+        background: "#fffaf6",
+        border: "2.3px solid #f55d2b",
+        borderRadius: 13,
+        boxShadow: "0 10px 28px 0 rgba(246, 122, 38, 0.13)",
+        padding: "35px 34px 18px 34px",
+        maxWidth: 430,
+        width: "93vw",
+        color: "#b85015",
+        fontFamily: "'IBM Plex Mono', monospace, Arial",
+        fontSize: 16,
+        fontWeight: 500,
+        textAlign: "center",
+        letterSpacing: 0.01,
+        marginBottom: 24
+      }}>
+      <div style={{ fontSize: 20, color: "#ea580c", fontWeight: 900, marginBottom: 11, fontFamily: "inherit" }}>
+        Data Collection Notice
+      </div>
+      <div style={{ marginBottom: 15, color: "#ad4a09", fontSize: 15, fontWeight: 600, fontFamily: "inherit" }}>
+        All processing is compliant with the laws below.
+        <br />
+        By using the service, you consent to the collection and analysis of technical data.
+      </div>
+      <button
+        onClick={handleConsentAccept}
+        style={{
+          background: "#f55d2b", color: "#fff", border: "none", borderRadius: 8,
+          fontWeight: 700, padding: "11px 32px", fontSize: 16, marginTop: 8, cursor: "pointer",
+          fontFamily: "inherit", marginBottom: 12
+        }}>
+        I Agree
+      </button>
+      <div style={{
+        fontSize: 13, color: "#ea580c", marginTop: 16, fontWeight: 600,
+        fontFamily: "inherit", textAlign: "center"
+      }}>
+        <a href="https://gdpr.eu/" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline", margin: "0 5px" }}>EU GDPR</a>
+        <span style={{ color: "#ad4a09" }}>&middot;</span>
+        <a href="https://ico.org.uk/for-organisations/guide-to-data-protection/" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline", margin: "0 5px" }}>UK Data Protection</a>
+        <span style={{ color: "#ad4a09" }}>&middot;</span>
+        <a href="https://www.ftc.gov/business-guidance/privacy-security" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline", margin: "0 5px" }}>US Privacy Laws</a>
+      </div>
+    </div>
+  </div>
+)}
 
       <div style={{
         minHeight: "100vh",
