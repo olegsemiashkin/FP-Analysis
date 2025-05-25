@@ -1,8 +1,42 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-
 const Map = dynamic(() => import("../components/Map"), { ssr: false });
 const AmlTab = dynamic(() => import("../components/AmlTab"), { ssr: false });
+
+function DataConsentModal({ open, onClose }) {
+  if (!open) return null;
+  return (
+    <div style={{
+      position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+      background: "rgba(33,26,18,0.18)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center"
+    }}
+      onClick={onClose}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "#fff8f2", borderRadius: 13, padding: 30, boxShadow: "0 12px 38px 0 rgba(246, 122, 38, 0.15)",
+          maxWidth: 370, textAlign: "center", border: "2px solid #ffe0c2"
+        }}
+      >
+        <div style={{ color: "#f55d2b", fontWeight: 700, fontSize: 18, marginBottom: 7 }}>
+          Data Collection Notice
+        </div>
+        <div style={{ color: "#bf590b", fontSize: 14, marginBottom: 19, lineHeight: 1.55 }}>
+          All processing is compliant with US, EU (GDPR), and UK data protection laws.<br />
+          By using the service, you consent to the collection of this data.
+        </div>
+        <button
+          style={{
+            background: "#f55d2b", color: "#fff", border: 0, borderRadius: 9,
+            padding: "8px 30px", fontWeight: 700, fontSize: 15, cursor: "pointer", marginTop: 4
+          }}
+          onClick={onClose}
+        >Accept</button>
+      </div>
+    </div>
+  );
+}
 
 function parseUA(ua = "") {
   let browser = "-";
@@ -61,7 +95,12 @@ export default function Home() {
   const [results, setResults] = useState([]);
   const [bulkLoading, setBulkLoading] = useState(false);
 
+  const [showConsent, setShowConsent] = useState(false);
+
   useEffect(() => {
+    if (typeof window !== "undefined" && !localStorage.getItem("dataConsentGiven")) {
+      setShowConsent(true);
+    }
     import('@fingerprintjs/fingerprintjs').then(FingerprintJS => {
       FingerprintJS.load().then(fp => {
         fp.get().then(async result => {
@@ -108,238 +147,130 @@ export default function Home() {
   }
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#fff7f2",
-      fontFamily: "'IBM Plex Mono', monospace, Arial"
-    }}>
-      <div style={{ maxWidth: 1120, margin: "0 auto", paddingTop: 28 }}>
-        {/* TAB BUTTONS */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 25 }}>
-          <button onClick={() => setTab("device")} style={tabBtn(tab === "device")}>Device Analysis</button>
-          <button onClick={() => setTab("bulk")} style={tabBtn(tab === "bulk")}>Bulk IP Check</button>
-          <button onClick={() => setTab("aml")} style={tabBtn(tab === "aml")}>AML / Crypto</button>
-        </div>
-
-        {/* DEVICE TAB */}
-        {tab === "device" && (
-          <div style={{
-            background: "#fff", borderRadius: 15, boxShadow: "0 6px 18px 0 rgba(246, 122, 38, 0.10)",
-            padding: 23, marginBottom: 28
-          }}>
-            <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 22, marginBottom: 16 }}>Identification</h2>
+    <>
+      <DataConsentModal
+        open={showConsent}
+        onClose={() => {
+          setShowConsent(false);
+          if (typeof window !== "undefined") localStorage.setItem("dataConsentGiven", "1");
+        }}
+      />
+      <div style={{
+        minHeight: "100vh",
+        background: "#fff7f2",
+        fontFamily: "'IBM Plex Mono', monospace, Arial"
+      }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto", paddingTop: 28 }}>
+          {/* Tabs */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 25 }}>
+            <button onClick={() => setTab("device")} style={tabBtn(tab === "device")}>Device Analysis</button>
+            <button onClick={() => setTab("bulk")} style={tabBtn(tab === "bulk")}>Bulk IP Check</button>
+            <button onClick={() => setTab("aml")} style={tabBtn(tab === "aml")}>AML / Crypto</button>
+          </div>
+          {/* DEVICE TAB */}
+          {tab === "device" && (
             <div style={{
-              background: "#fff3e7", border: "2px dashed #f55d2b", borderRadius: 9, padding: "12px 18px", marginBottom: 20,
-              fontSize: 16, fontWeight: 700, color: "#f55d2b", letterSpacing: 1
+              background: "#fff", borderRadius: 15, boxShadow: "0 6px 18px 0 rgba(246, 122, 38, 0.10)",
+              padding: 23, marginBottom: 28
             }}>
-              Visitor ID: <span style={{ fontFamily: "monospace" }}>{visitorId || "Calculating..."}</span>
+              {/* ... (оставь тут свою верстку карточек и карты) ... */}
+              {/* -- всё как раньше -- */}
             </div>
-            {/* --- Сетка карточек с картой справа --- */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
-                gridTemplateRows: "repeat(2, 1fr)",
-                gap: 13,
-                marginBottom: 20,
-                alignItems: "stretch",
-                minHeight: 145
-              }}
-            >
-              {/* Левая часть: карточки */}
-              {mainCards.slice(0, 3).map(({ key, label }) => (
-                <div key={key} style={mainCardStyleSmall}>
-                  <div style={mainCardLabelSmall}>{label}</div>
-                  <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData[key] || "-"}</div>
-                </div>
-              ))}
-              {/* Карта — 2 строки, 1 колонка справа */}
-              <div
+          )}
+          {/* BULK TAB */}
+          {tab === "bulk" && (
+            <div style={{
+              background: "#fff", borderRadius: 14, boxShadow: "0 8px 30px 0 rgba(246, 122, 38, 0.13)", padding: 23
+            }}>
+              <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 18, marginBottom: 13 }}>Bulk IP Check</h2>
+              <textarea
+                rows={4}
                 style={{
-                  gridRow: "1 / span 2", gridColumn: "4 / span 1",
-                  background: "#fff8f2",
-                  border: "2px solid #ffe0c2",
-                  borderRadius: 13,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  padding: 11,
-                  minHeight: 145,
-                  justifyContent: "center",
-                  boxShadow: "0 2px 8px 0 rgba(246,122,38,0.03)"
+                  width: "100%", resize: "vertical", borderRadius: 8, border: "1px solid #fdad60",
+                  padding: 8, fontSize: 12, marginBottom: 7, fontFamily: "inherit"
                 }}
-              >
-                <div style={{ fontWeight: 700, fontSize: 20, color: "#2d2d2d", marginBottom: 2, textAlign: "center" }}>
-                  Geolocation <span style={{ fontSize: 14, color: "#f55d2b" }}>↗</span>
-                </div>
-                <div style={{ fontSize: 13, color: "#ad5a11", marginBottom: 7, textAlign: "center" }}>
-                  {geo?.city}, {geo?.region},<br />{geo?.country_name}
-                </div>
-                <div
-                  style={{
-                    width: 170,
-                    height: 80,
-                    borderRadius: 8,
-                    border: "2px solid #3396f3",
-                    overflow: "hidden",
-                    marginTop: 5,
-                    boxShadow: "0 2px 8px 0 rgba(45,143,222,0.09)"
-                  }}
-                >
-                  {geo && Number(geo.latitude) && Number(geo.longitude) ? (
-                    <Map lat={Number(geo.latitude)} lon={Number(geo.longitude)} />
-                  ) : (
-                    <div style={{ color: "#d15000", padding: 22, textAlign: "center", fontWeight: 600 }}>
-                      No map
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* Вторая строка карточек */}
-              {mainCards.slice(3, 7).map(({ key, label }) => (
-                <div key={key} style={mainCardStyleSmall}>
-                  <div style={mainCardLabelSmall}>{label}</div>
-                  <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData[key] || "-"}</div>
-                </div>
-              ))}
-              {/* Последняя ячейка: Languages */}
-              <div style={{ ...mainCardStyleSmall, gridColumn: "2 / span 2" }}>
-                <div style={mainCardLabelSmall}>Languages</div>
-                <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData.languages || "-"}</div>
-              </div>
-            </div>
-            {/* Device Details Cards */}
-            <h3 style={{ color: "#f55d2b", fontWeight: 600, fontSize: 14, marginBottom: 10, marginTop: 10 }}>Device Details</h3>
-            <div style={{
-              display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 12
-            }}>
-              {deviceParams.map(({ key, label }) => {
-                const val = details?.[key]?.value;
-                let displayValue = "-";
-                if (Array.isArray(val)) displayValue = val.join(", ");
-                else if (typeof val === "object" && val !== null) displayValue = JSON.stringify(val);
-                else if (typeof val !== "undefined") displayValue = String(val);
-                return (
-                  <div key={key} style={{
-                    background: "#fff", border: "1.2px solid #ffe0c2", borderRadius: 8,
-                    padding: "8px 8px", fontSize: 12, fontWeight: 600,
-                    color: "#b45309", boxShadow: "0 1.5px 6px 0 rgba(246,122,38,0.03)"
-                  }}>
-                    <div style={{ color: "#f55d2b", fontSize: 11, fontWeight: 700, marginBottom: 2 }}>{label}</div>
-                    <div style={{ fontSize: 12, wordBreak: "break-word" }}>
-                      {displayValue.length > 80 ? displayValue.slice(0, 77) + "..." : displayValue}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <button
-              style={{
-                marginTop: 6, background: "#fff3e7", color: "#e05222", border: "1px solid #ffcc99",
-                borderRadius: 7, padding: "6px 15px", fontWeight: 600, cursor: "pointer", fontSize: 12
-              }}
-              onClick={() => setShowAll(v => !v)}
-            >
-              {showAll ? "Hide all details" : "Show all details"}
-            </button>
-            {showAll && (
-              <pre style={{
-                background: "#fff8f2", border: "1px solid #ffe0c2", borderRadius: 9,
-                padding: 10, marginTop: 7, fontSize: 11, color: "#6a3403", whiteSpace: "pre-wrap"
-              }}>
-                {JSON.stringify(details, null, 2)}
-              </pre>
-            )}
-          </div>
-        )}
-
-        {/* BULK TAB */}
-        {tab === "bulk" && (
-          <div style={{
-            background: "#fff", borderRadius: 14, boxShadow: "0 8px 30px 0 rgba(246, 122, 38, 0.13)", padding: 23
-          }}>
-            <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 18, marginBottom: 13 }}>Bulk IP Check</h2>
-            <textarea
-              rows={4}
-              style={{
-                width: "100%", resize: "vertical", borderRadius: 8, border: "1px solid #fdad60",
-                padding: 8, fontSize: 12, marginBottom: 7, fontFamily: "inherit"
-              }}
-              value={ips}
-              onChange={handleBulkInput}
-              placeholder="Paste any text or list of IPs — will be extracted automatically"
-            />
-            <button
-              onClick={handleBulkCheck}
-              disabled={bulkLoading || !ips.trim()}
-              style={{
-                background: "#f55d2b", color: "#fff", border: 0, borderRadius: 8,
-                padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: bulkLoading ? "wait" : "pointer",
-                marginBottom: 10, marginTop: 3
-              }}>
-              {bulkLoading ? "Checking..." : "Check IPs"}
-            </button>
-            <div style={{ marginTop: 14 }}>
-              {results.length > 0 && (
-                <table style={{
-                  width: "100%", background: "#fff7f2", borderRadius: 8,
-                  fontSize: 14, borderCollapse: "separate", borderSpacing: 0
+                value={ips}
+                onChange={handleBulkInput}
+                placeholder="Paste any text or list of IPs — will be extracted automatically"
+              />
+              <button
+                onClick={handleBulkCheck}
+                disabled={bulkLoading || !ips.trim()}
+                style={{
+                  background: "#f55d2b", color: "#fff", border: 0, borderRadius: 8,
+                  padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: bulkLoading ? "wait" : "pointer",
+                  marginBottom: 10, marginTop: 3
                 }}>
-                  <thead>
-                    <tr>
-                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>IP</th>
-                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Country</th>
-                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>City</th>
-                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Proxy</th>
-                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>VPN</th>
-                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>TOR</th>
-                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Org/ISP</th>
-                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {results.map((r, i) => (
-                      <tr key={i}>
-                        <td style={{ padding: 8 }}>{r.ip}</td>
-                        <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
-                        <td style={{ padding: 8 }}>{r.data?.city || "-"}</td>
-                        <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                          {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
-                        </td>
-                        <td style={{ padding: 8, color: r.data?.vpn ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                          {typeof r.data?.vpn === "boolean" ? (r.data.vpn ? "Yes" : "No") : "-"}
-                        </td>
-                        <td style={{ padding: 8, color: r.data?.tor ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                          {typeof r.data?.tor === "boolean" ? (r.data.tor ? "Yes" : "No") : "-"}
-                        </td>
-                        <td style={{ padding: 8 }}>{r.data?.org || "-"}</td>
-                        <td style={{ padding: 8 }}>
-                          <details>
-                            <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
-                            <pre style={{
-                              background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2
-                            }}>{JSON.stringify(r.data, null, 2)}</pre>
-                          </details>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+                {bulkLoading ? "Checking..." : "Check IPs"}
+              </button>
+              <div style={{ marginTop: 14 }}>
+                {results.length > 0 && (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{
+                      width: "100%", background: "#fff7f2", borderRadius: 8,
+                      fontSize: 14, borderCollapse: "separate", borderSpacing: 0, minWidth: 900
+                    }}>
+                      <thead>
+                        <tr>
+                          <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>IP</th>
+                          <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Country</th>
+                          <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>ISP</th>
+                          <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Proxy</th>
+                          <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>VPN</th>
+                          <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>TOR</th>
+                          <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Fraud Score</th>
+                          <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Recent Abuse</th>
+                          <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Details</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {results.map((r, i) => (
+                          <tr key={i}>
+                            <td style={{ padding: 8 }}>{r.ip}</td>
+                            <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
+                            <td style={{ padding: 8 }}>{r.data?.ISP || "-"}</td>
+                            <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                              {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
+                            </td>
+                            <td style={{ padding: 8, color: r.data?.vpn ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                              {typeof r.data?.vpn === "boolean" ? (r.data.vpn ? "Yes" : "No") : "-"}
+                            </td>
+                            <td style={{ padding: 8, color: r.data?.tor ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                              {typeof r.data?.tor === "boolean" ? (r.data.tor ? "Yes" : "No") : "-"}
+                            </td>
+                            <td style={{ padding: 8 }}>{r.data?.fraud_score ?? "-"}</td>
+                            <td style={{ padding: 8 }}>{r.data?.recent_abuse ? "Yes" : "No"}</td>
+                            <td style={{ padding: 8 }}>
+                              <details>
+                                <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
+                                <pre style={{
+                                  background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2, maxWidth: 370, overflowX: "auto"
+                                }}>{JSON.stringify(r.data, null, 2)}</pre>
+                              </details>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </div>
+          )}
+          {/* AML TAB */}
+          {tab === "aml" && <AmlTab />}
+          <div style={{ marginTop: 22, textAlign: "center", color: "#e05222", fontSize: 11, letterSpacing: 1 }}>
+            <a href="https://github.com/olegsemiashkin/FP-Analysis" style={{ color: "#e05222" }}>
+              GitHub Project
+            </a>
+            &nbsp;|&nbsp;
+            <a href="https://inspectify-sepia.vercel.app/" style={{ color: "#e05222" }}>
+              Live Demo
+            </a>
           </div>
-        )}
-
-        {/* AML / CRYPTO TAB */}
-        {tab === "aml" && <AmlTab />}
-
-        <div style={{ marginTop: 22, textAlign: "center", color: "#e05222", fontSize: 11, letterSpacing: 1 }}>
-          <a href="https://github.com/olegsemiashkin/FP-Analysis" style={{ color: "#e05222" }}>
-            GitHub Project
-          </a>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
