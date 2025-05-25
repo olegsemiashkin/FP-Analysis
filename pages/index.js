@@ -77,28 +77,48 @@ export default function Home() {
     }
   }
 
-  useEffect(() => {
+ useEffect(() => {
   import('@fingerprintjs/fingerprintjs').then(FingerprintJS => {
     FingerprintJS.load().then(fp => {
       fp.get().then(async result => {
         setVisitorId(result.visitorId);
         setDetails(result.components || {});
-        // ipapi.co
-        const ipResp = await fetch("https://ipapi.co/json/");
-        const ipData = await ipResp.json();
         let ua = result.components?.userAgent?.value;
         if (!ua && typeof window !== "undefined") ua = window.navigator.userAgent;
         const parsed = parseUA(ua);
+
+        // --- Попытка взять гео из кэша ---
+        let ipData = null;
+        try {
+          const cached = localStorage.getItem('ipapi_data');
+          if (cached) {
+            ipData = JSON.parse(cached);
+          } else {
+            const ipResp = await fetch("https://ipapi.co/json/");
+            ipData = await ipResp.json();
+            localStorage.setItem('ipapi_data', JSON.stringify(ipData));
+          }
+        } catch (err) {
+          // fallback мок, если всё упало
+          ipData = {
+            ip: "8.8.8.8",
+            country_name: "USA",
+            region: "California",
+            city: "Mountain View",
+            latitude: 37.386,
+            longitude: -122.084
+          };
+        }
         setGeo(ipData);
         setMainData({
-          ip: ipData.ip,
-          country: ipData.country_name,
-          region: ipData.region,
-          city: ipData.city,
+          ip: ipData.ip || "-",
+          country: ipData.country_name || "-",
+          region: ipData.region || "-",
+          city: ipData.city || "-",
           browser: parsed.browser,
           os: parsed.os,
           platform: result.components?.platform?.value || "-",
-          languages: (result.components?.languages?.value || []).join(", ") || "-",
+          languages: (result.components?.languages?.value || []).join(", ") || "-"
         });
       });
     });
