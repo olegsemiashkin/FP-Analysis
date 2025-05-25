@@ -83,26 +83,30 @@ export default function Home() {
         fp.get().then(async result => {
           setVisitorId(result.visitorId);
           setDetails(result.components || {});
-          const ipResp = await fetch("https://ipapi.co/json/");
-          const ipData = await ipResp.json();
-          let ua = result.components?.userAgent?.value;
-          if (!ua && typeof window !== "undefined") ua = window.navigator.userAgent;
-          const parsed = parseUA(ua);
-          setGeo(ipData);
-          setMainData({
-            ip: ipData.ip,
-            country: ipData.country_name,
-            region: ipData.region,
-            city: ipData.city,
-            browser: parsed.browser,
-            os: parsed.os,
-            platform: result.components?.platform?.value || "-",
-            languages: (result.components?.languages?.value || []).join(", ") || "-",
-          });
+          const ipResp = await fetch("https://ipinfo.io/json?token=cyXaaMXzr2SHL4AzXnINfUnX49WznCvb");
+        const ipData = await ipResp.json();
+        let loc = ipData.loc ? ipData.loc.split(",") : [];
+        ipData.latitude = loc[0] || "";
+        ipData.longitude = loc[1] || "";
+        ipData.country_name = ipData.country || "";
+        let ua = result.components?.userAgent?.value;
+        if (!ua && typeof window !== "undefined") ua = window.navigator.userAgent;
+        const parsed = parseUA(ua);
+        setGeo(ipData);
+        setMainData({
+          ip: ipData.ip,
+          country: ipData.country_name,
+          region: ipData.region,
+          city: ipData.city,
+          browser: parsed.browser,
+          os: parsed.os,
+          platform: result.components?.platform?.value || "-",
+          languages: (result.components?.languages?.value || []).join(", ") || "-",
         });
       });
     });
-  }, []);
+  });
+}, []);
 
   async function handleBulkCheck() {
     setBulkLoading(true);
