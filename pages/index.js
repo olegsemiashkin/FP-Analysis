@@ -78,17 +78,14 @@ export default function Home() {
   }
 
   useEffect(() => {
-    import('@fingerprintjs/fingerprintjs').then(FingerprintJS => {
-      FingerprintJS.load().then(fp => {
-        fp.get().then(async result => {
-          setVisitorId(result.visitorId);
-          setDetails(result.components || {});
-          const ipResp = await fetch("https://ipinfo.io/json?token=cyXaaMXzr2SHL4AzXnINfUnX49WznCvb");
+  import('@fingerprintjs/fingerprintjs').then(FingerprintJS => {
+    FingerprintJS.load().then(fp => {
+      fp.get().then(async result => {
+        setVisitorId(result.visitorId);
+        setDetails(result.components || {});
+        // ipapi.co
+        const ipResp = await fetch("https://ipapi.co/json/");
         const ipData = await ipResp.json();
-        let loc = ipData.loc ? ipData.loc.split(",") : [];
-        ipData.latitude = loc[0] || "";
-        ipData.longitude = loc[1] || "";
-        ipData.country_name = ipData.country || "";
         let ua = result.components?.userAgent?.value;
         if (!ua && typeof window !== "undefined") ua = window.navigator.userAgent;
         const parsed = parseUA(ua);
