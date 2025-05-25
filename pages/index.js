@@ -61,22 +61,6 @@ export default function Home() {
   const [results, setResults] = useState([]);
   const [bulkLoading, setBulkLoading] = useState(false);
 
-  // ---- POPUP CONSENT ----
-  const [showConsent, setShowConsent] = useState(true);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (window.localStorage.getItem("consent_accepted") === "1") {
-        setShowConsent(false);
-      }
-    }
-  }, []);
-  function handleConsentAccept() {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("consent_accepted", "1");
-      setShowConsent(false);
-    }
-  }
-
   useEffect(() => {
     import('@fingerprintjs/fingerprintjs').then(FingerprintJS => {
       FingerprintJS.load().then(fp => {
@@ -124,294 +108,238 @@ export default function Home() {
   }
 
   return (
-    <>
-      {showConsent && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", zIndex: 9999,
-          background: "rgba(40, 25, 14, 0.13)", display: "flex", alignItems: "center", justifyContent: "center"
-        }}
-          onClick={handleConsentAccept}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              background: "#fff7f2",
-              border: "2px solid #f55d2b",
-              borderRadius: 15,
-              boxShadow: "0 8px 32px 0 rgba(246, 122, 38, 0.16)",
-              padding: "30px 40px",
-              maxWidth: 440,
-              width: "90vw",
-              color: "#ba4107",
-              fontSize: 15,
-              fontWeight: 600,
-              textAlign: "center",
-              letterSpacing: 0.3,
-            }}>
-            <div style={{ fontSize: 21, color: "#ea580c", fontWeight: 900, marginBottom: 11 }}>
-              Data Collection Notice
-            </div>
-            <div style={{ marginBottom: 13, color: "#b45309" }}>
-              All processing is compliant with&nbsp;
-              <a href="https://gdpr.eu/" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline" }}>
-                EU GDPR
-              </a>
-              ,&nbsp;
-              <a href="https://ico.org.uk/for-organisations/guide-to-data-protection/" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline" }}>
-                UK Data Protection
-              </a>
-              , and&nbsp;
-              <a href="https://www.ftc.gov/business-guidance/privacy-security" target="_blank" rel="noopener noreferrer" style={{ color: "#e05222", textDecoration: "underline" }}>
-                US Privacy Laws
-              </a>
-              .<br />
-              By using the service, you consent to the collection and analysis of technical data.
-            </div>
-            <button
-              onClick={handleConsentAccept}
-              style={{
-                background: "#f55d2b", color: "#fff", border: "none", borderRadius: 7,
-                fontWeight: 700, padding: "9px 22px", fontSize: 16, marginTop: 7, cursor: "pointer"
-              }}>
-              I Agree
-            </button>
-          </div>
+    <div style={{
+      minHeight: "100vh",
+      background: "#fff7f2",
+      fontFamily: "'IBM Plex Mono', monospace, Arial"
+    }}>
+      <div style={{ maxWidth: 1120, margin: "0 auto", paddingTop: 28 }}>
+        {/* TAB BUTTONS */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 25 }}>
+          <button onClick={() => setTab("device")} style={tabBtn(tab === "device")}>Device Analysis</button>
+          <button onClick={() => setTab("bulk")} style={tabBtn(tab === "bulk")}>Bulk IP Check</button>
+          <button onClick={() => setTab("aml")} style={tabBtn(tab === "aml")}>AML / Crypto</button>
         </div>
-      )}
 
-      <div style={{
-        minHeight: "100vh",
-        background: "#fff7f2",
-        fontFamily: "'IBM Plex Mono', monospace, Arial"
-      }}>
-        <div style={{ maxWidth: 1120, margin: "0 auto", paddingTop: 28 }}>
-          {/* TAB BUTTONS */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 25 }}>
-            <button onClick={() => setTab("device")} style={tabBtn(tab === "device")}>Device Analysis</button>
-            <button onClick={() => setTab("bulk")} style={tabBtn(tab === "bulk")}>Bulk IP Check</button>
-            <button onClick={() => setTab("aml")} style={tabBtn(tab === "aml")}>AML / Crypto</button>
-          </div>
-
-          {/* DEVICE TAB */}
-          {tab === "device" && (
+        {/* DEVICE TAB */}
+        {tab === "device" && (
+          <div style={{
+            background: "#fff", borderRadius: 15, boxShadow: "0 6px 18px 0 rgba(246, 122, 38, 0.10)",
+            padding: 23, marginBottom: 28
+          }}>
+            <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 22, marginBottom: 16 }}>Identification</h2>
             <div style={{
-              background: "#fff", borderRadius: 15, boxShadow: "0 6px 18px 0 rgba(246, 122, 38, 0.10)",
-              padding: 23, marginBottom: 28
+              background: "#fff3e7", border: "2px dashed #f55d2b", borderRadius: 9, padding: "12px 18px", marginBottom: 20,
+              fontSize: 16, fontWeight: 700, color: "#f55d2b", letterSpacing: 1
             }}>
-              <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 22, marginBottom: 16 }}>Identification</h2>
-              <div style={{
-                background: "#fff3e7", border: "2px dashed #f55d2b", borderRadius: 9, padding: "12px 18px", marginBottom: 20,
-                fontSize: 16, fontWeight: 700, color: "#f55d2b", letterSpacing: 1
-              }}>
-                Visitor ID: <span style={{ fontFamily: "monospace" }}>{visitorId || "Calculating..."}</span>
-              </div>
-              {/* --- Сетка карточек с картой справа --- */}
+              Visitor ID: <span style={{ fontFamily: "monospace" }}>{visitorId || "Calculating..."}</span>
+            </div>
+            {/* --- Сетка карточек с картой справа --- */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gridTemplateRows: "repeat(2, 1fr)",
+                gap: 13,
+                marginBottom: 20,
+                alignItems: "stretch",
+                minHeight: 145
+              }}
+            >
+              {/* Левая часть: карточки */}
+              {mainCards.slice(0, 3).map(({ key, label }) => (
+                <div key={key} style={mainCardStyleSmall}>
+                  <div style={mainCardLabelSmall}>{label}</div>
+                  <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData[key] || "-"}</div>
+                </div>
+              ))}
+              {/* Карта — 2 строки, 1 колонка справа */}
               <div
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(4, 1fr)",
-                  gridTemplateRows: "repeat(2, 1fr)",
-                  gap: 13,
-                  marginBottom: 20,
-                  alignItems: "stretch",
-                  minHeight: 145
+                  gridRow: "1 / span 2", gridColumn: "4 / span 1",
+                  background: "#fff8f2",
+                  border: "2px solid #ffe0c2",
+                  borderRadius: 13,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: 11,
+                  minHeight: 145,
+                  justifyContent: "center",
+                  boxShadow: "0 2px 8px 0 rgba(246,122,38,0.03)"
                 }}
               >
-                {/* Левая часть: карточки */}
-                {mainCards.slice(0, 3).map(({ key, label }) => (
-                  <div key={key} style={mainCardStyleSmall}>
-                    <div style={mainCardLabelSmall}>{label}</div>
-                    <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData[key] || "-"}</div>
-                  </div>
-                ))}
-                {/* Карта — 2 строки, 1 колонка справа */}
+                <div style={{ fontWeight: 700, fontSize: 20, color: "#2d2d2d", marginBottom: 2, textAlign: "center" }}>
+                  Geolocation <span style={{ fontSize: 14, color: "#f55d2b" }}>↗</span>
+                </div>
+                <div style={{ fontSize: 13, color: "#ad5a11", marginBottom: 7, textAlign: "center" }}>
+                  {geo?.city}, {geo?.region},<br />{geo?.country_name}
+                </div>
                 <div
                   style={{
-                    gridRow: "1 / span 2", gridColumn: "4 / span 1",
-                    background: "#fff8f2",
-                    border: "2px solid #ffe0c2",
-                    borderRadius: 13,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    padding: 11,
-                    minHeight: 145,
-                    justifyContent: "center",
-                    boxShadow: "0 2px 8px 0 rgba(246,122,38,0.03)"
+                    width: 170,
+                    height: 80,
+                    borderRadius: 8,
+                    border: "2px solid #3396f3",
+                    overflow: "hidden",
+                    marginTop: 5,
+                    boxShadow: "0 2px 8px 0 rgba(45,143,222,0.09)"
                   }}
                 >
-                  <div style={{ fontWeight: 700, fontSize: 20, color: "#2d2d2d", marginBottom: 2, textAlign: "center" }}>
-                    Geolocation <span style={{ fontSize: 14, color: "#f55d2b" }}>↗</span>
-                  </div>
-                  <div style={{ fontSize: 13, color: "#ad5a11", marginBottom: 7, textAlign: "center" }}>
-                    {geo?.city}, {geo?.region},<br />{geo?.country_name}
-                  </div>
-                  <div
-                    style={{
-                      width: 170,
-                      height: 80,
-                      borderRadius: 8,
-                      border: "2px solid #3396f3",
-                      overflow: "hidden",
-                      marginTop: 5,
-                      boxShadow: "0 2px 8px 0 rgba(45,143,222,0.09)"
-                    }}
-                  >
-                    {geo && Number(geo.latitude) && Number(geo.longitude) ? (
-                      <Map lat={Number(geo.latitude)} lon={Number(geo.longitude)} />
-                    ) : (
-                      <div style={{ color: "#d15000", padding: 22, textAlign: "center", fontWeight: 600 }}>
-                        No map
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {/* Вторая строка карточек */}
-                {mainCards.slice(3, 7).map(({ key, label }) => (
-                  <div key={key} style={mainCardStyleSmall}>
-                    <div style={mainCardLabelSmall}>{label}</div>
-                    <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData[key] || "-"}</div>
-                  </div>
-                ))}
-                {/* Последняя ячейка: Languages */}
-                <div style={{ ...mainCardStyleSmall, gridColumn: "2 / span 2" }}>
-                  <div style={mainCardLabelSmall}>Languages</div>
-                  <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData.languages || "-"}</div>
-                </div>
-              </div>
-              {/* Device Details Cards */}
-              <h3 style={{ color: "#f55d2b", fontWeight: 600, fontSize: 14, marginBottom: 10, marginTop: 10 }}>Device Details</h3>
-              <div style={{
-                display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 12
-              }}>
-                {deviceParams.map(({ key, label }) => {
-                  const val = details?.[key]?.value;
-                  let displayValue = "-";
-                  if (Array.isArray(val)) displayValue = val.join(", ");
-                  else if (typeof val === "object" && val !== null) displayValue = JSON.stringify(val);
-                  else if (typeof val !== "undefined") displayValue = String(val);
-                  return (
-                    <div key={key} style={{
-                      background: "#fff", border: "1.2px solid #ffe0c2", borderRadius: 8,
-                      padding: "8px 8px", fontSize: 12, fontWeight: 600,
-                      color: "#b45309", boxShadow: "0 1.5px 6px 0 rgba(246,122,38,0.03)"
-                    }}>
-                      <div style={{ color: "#f55d2b", fontSize: 11, fontWeight: 700, marginBottom: 2 }}>{label}</div>
-                      <div style={{ fontSize: 12, wordBreak: "break-word" }}>
-                        {displayValue.length > 80 ? displayValue.slice(0, 77) + "..." : displayValue}
-                      </div>
+                  {geo && Number(geo.latitude) && Number(geo.longitude) ? (
+                    <Map lat={Number(geo.latitude)} lon={Number(geo.longitude)} />
+                  ) : (
+                    <div style={{ color: "#d15000", padding: 22, textAlign: "center", fontWeight: 600 }}>
+                      No map
                     </div>
-                  );
-                })}
+                  )}
+                </div>
               </div>
-              <button
-                style={{
-                  marginTop: 6, background: "#fff3e7", color: "#e05222", border: "1px solid #ffcc99",
-                  borderRadius: 7, padding: "6px 15px", fontWeight: 600, cursor: "pointer", fontSize: 12
-                }}
-                onClick={() => setShowAll(v => !v)}
-              >
-                {showAll ? "Hide all details" : "Show all details"}
-              </button>
-              {showAll && (
-                <pre style={{
-                  background: "#fff8f2", border: "1px solid #ffe0c2", borderRadius: 9,
-                  padding: 10, marginTop: 7, fontSize: 11, color: "#6a3403", whiteSpace: "pre-wrap"
+              {/* Вторая строка карточек */}
+              {mainCards.slice(3, 7).map(({ key, label }) => (
+                <div key={key} style={mainCardStyleSmall}>
+                  <div style={mainCardLabelSmall}>{label}</div>
+                  <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData[key] || "-"}</div>
+                </div>
+              ))}
+              {/* Последняя ячейка: Languages */}
+              <div style={{ ...mainCardStyleSmall, gridColumn: "2 / span 2" }}>
+                <div style={mainCardLabelSmall}>Languages</div>
+                <div style={{ fontWeight: 700, fontSize: 16, marginTop: 5 }}>{mainData.languages || "-"}</div>
+              </div>
+            </div>
+            {/* Device Details Cards */}
+            <h3 style={{ color: "#f55d2b", fontWeight: 600, fontSize: 14, marginBottom: 10, marginTop: 10 }}>Device Details</h3>
+            <div style={{
+              display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 12
+            }}>
+              {deviceParams.map(({ key, label }) => {
+                const val = details?.[key]?.value;
+                let displayValue = "-";
+                if (Array.isArray(val)) displayValue = val.join(", ");
+                else if (typeof val === "object" && val !== null) displayValue = JSON.stringify(val);
+                else if (typeof val !== "undefined") displayValue = String(val);
+                return (
+                  <div key={key} style={{
+                    background: "#fff", border: "1.2px solid #ffe0c2", borderRadius: 8,
+                    padding: "8px 8px", fontSize: 12, fontWeight: 600,
+                    color: "#b45309", boxShadow: "0 1.5px 6px 0 rgba(246,122,38,0.03)"
+                  }}>
+                    <div style={{ color: "#f55d2b", fontSize: 11, fontWeight: 700, marginBottom: 2 }}>{label}</div>
+                    <div style={{ fontSize: 12, wordBreak: "break-word" }}>
+                      {displayValue.length > 80 ? displayValue.slice(0, 77) + "..." : displayValue}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <button
+              style={{
+                marginTop: 6, background: "#fff3e7", color: "#e05222", border: "1px solid #ffcc99",
+                borderRadius: 7, padding: "6px 15px", fontWeight: 600, cursor: "pointer", fontSize: 12
+              }}
+              onClick={() => setShowAll(v => !v)}
+            >
+              {showAll ? "Hide all details" : "Show all details"}
+            </button>
+            {showAll && (
+              <pre style={{
+                background: "#fff8f2", border: "1px solid #ffe0c2", borderRadius: 9,
+                padding: 10, marginTop: 7, fontSize: 11, color: "#6a3403", whiteSpace: "pre-wrap"
+              }}>
+                {JSON.stringify(details, null, 2)}
+              </pre>
+            )}
+          </div>
+        )}
+
+        {/* BULK TAB */}
+        {tab === "bulk" && (
+          <div style={{
+            background: "#fff", borderRadius: 14, boxShadow: "0 8px 30px 0 rgba(246, 122, 38, 0.13)", padding: 23
+          }}>
+            <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 18, marginBottom: 13 }}>Bulk IP Check</h2>
+            <textarea
+              rows={4}
+              style={{
+                width: "100%", resize: "vertical", borderRadius: 8, border: "1px solid #fdad60",
+                padding: 8, fontSize: 12, marginBottom: 7, fontFamily: "inherit"
+              }}
+              value={ips}
+              onChange={handleBulkInput}
+              placeholder="Paste any text or list of IPs — will be extracted automatically"
+            />
+            <button
+              onClick={handleBulkCheck}
+              disabled={bulkLoading || !ips.trim()}
+              style={{
+                background: "#f55d2b", color: "#fff", border: 0, borderRadius: 8,
+                padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: bulkLoading ? "wait" : "pointer",
+                marginBottom: 10, marginTop: 3
+              }}>
+              {bulkLoading ? "Checking..." : "Check IPs"}
+            </button>
+            <div style={{ marginTop: 14 }}>
+              {results.length > 0 && (
+                <table style={{
+                  width: "100%", background: "#fff7f2", borderRadius: 8,
+                  fontSize: 14, borderCollapse: "separate", borderSpacing: 0
                 }}>
-                  {JSON.stringify(details, null, 2)}
-                </pre>
+                  <thead>
+                    <tr>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>IP</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Country</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>City</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Proxy</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>VPN</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>TOR</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Org/ISP</th>
+                      <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.map((r, i) => (
+                      <tr key={i}>
+                        <td style={{ padding: 8 }}>{r.ip}</td>
+                        <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
+                        <td style={{ padding: 8 }}>{r.data?.city || "-"}</td>
+                        <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                          {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
+                        </td>
+                        <td style={{ padding: 8, color: r.data?.vpn ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                          {typeof r.data?.vpn === "boolean" ? (r.data.vpn ? "Yes" : "No") : "-"}
+                        </td>
+                        <td style={{ padding: 8, color: r.data?.tor ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
+                          {typeof r.data?.tor === "boolean" ? (r.data.tor ? "Yes" : "No") : "-"}
+                        </td>
+                        <td style={{ padding: 8 }}>{r.data?.org || "-"}</td>
+                        <td style={{ padding: 8 }}>
+                          <details>
+                            <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
+                            <pre style={{
+                              background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2
+                            }}>{JSON.stringify(r.data, null, 2)}</pre>
+                          </details>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
-          )}
-
-          {/* BULK TAB */}
-          {tab === "bulk" && (
-            <div style={{
-              background: "#fff", borderRadius: 14, boxShadow: "0 8px 30px 0 rgba(246, 122, 38, 0.13)", padding: 23
-            }}>
-              <h2 style={{ color: "#f55d2b", fontWeight: 700, fontSize: 18, marginBottom: 13 }}>Bulk IP Check</h2>
-              <textarea
-                rows={4}
-                style={{
-                  width: "100%", resize: "vertical", borderRadius: 8, border: "1px solid #fdad60",
-                  padding: 8, fontSize: 12, marginBottom: 7, fontFamily: "inherit"
-                }}
-                value={ips}
-                onChange={handleBulkInput}
-                placeholder="Paste any text or list of IPs — will be extracted automatically"
-              />
-              <button
-                onClick={handleBulkCheck}
-                disabled={bulkLoading || !ips.trim()}
-                style={{
-                  background: "#f55d2b", color: "#fff", border: 0, borderRadius: 8,
-                  padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: bulkLoading ? "wait" : "pointer",
-                  marginBottom: 10, marginTop: 3
-                }}>
-                {bulkLoading ? "Checking..." : "Check IPs"}
-              </button>
-              <div style={{ marginTop: 14 }}>
-                {results.length > 0 && (
-                  <table style={{
-                    width: "100%", background: "#fff7f2", borderRadius: 8,
-                    fontSize: 14, borderCollapse: "separate", borderSpacing: 0
-                  }}>
-                    <thead>
-                      <tr>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>IP</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Country</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>City</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Proxy</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>VPN</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>TOR</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Org/ISP</th>
-                        <th style={{ color: "#f55d2b", padding: 8, textAlign: "left" }}>Details</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {results.map((r, i) => (
-                        <tr key={i}>
-                          <td style={{ padding: 8 }}>{r.ip}</td>
-                          <td style={{ padding: 8 }}>{r.data?.country || "-"}</td>
-                          <td style={{ padding: 8 }}>{r.data?.city || "-"}</td>
-                          <td style={{ padding: 8, color: r.data?.proxy ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                            {typeof r.data?.proxy === "boolean" ? (r.data.proxy ? "Yes" : "No") : "-"}
-                          </td>
-                          <td style={{ padding: 8, color: r.data?.vpn ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                            {typeof r.data?.vpn === "boolean" ? (r.data.vpn ? "Yes" : "No") : "-"}
-                          </td>
-                          <td style={{ padding: 8, color: r.data?.tor ? '#e95a16' : '#2b7b2b', fontWeight: 600 }}>
-                            {typeof r.data?.tor === "boolean" ? (r.data.tor ? "Yes" : "No") : "-"}
-                          </td>
-                          <td style={{ padding: 8 }}>{r.data?.org || "-"}</td>
-                          <td style={{ padding: 8 }}>
-                            <details>
-                              <summary style={{ cursor: "pointer", color: "#ea580c", fontWeight: 500 }}>Details</summary>
-                              <pre style={{
-                                background: "#fff4e7", borderRadius: 6, padding: 4, fontSize: 10, marginTop: 2
-                              }}>{JSON.stringify(r.data, null, 2)}</pre>
-                            </details>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* AML / CRYPTO TAB */}
-          {tab === "aml" && <AmlTab />}
-
-          <div style={{ marginTop: 22, textAlign: "center", color: "#e05222", fontSize: 11, letterSpacing: 1 }}>
-            <a href="https://github.com/olegsemiashkin/FP-Analysis" style={{ color: "#e05222" }}>
-              GitHub Project
-            </a>
           </div>
+        )}
+
+        {/* AML / CRYPTO TAB */}
+        {tab === "aml" && <AmlTab />}
+
+        <div style={{ marginTop: 22, textAlign: "center", color: "#e05222", fontSize: 11, letterSpacing: 1 }}>
+          <a href="https://github.com/olegsemiashkin/FP-Analysis" style={{ color: "#e05222" }}>
+            GitHub Project
+          </a>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
