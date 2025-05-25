@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -450,4 +449,3 @@ const tabBtn = active => ({
   borderRadius: 9,
   cursor: "pointer"
 });
-
