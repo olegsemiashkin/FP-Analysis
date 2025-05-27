@@ -406,13 +406,12 @@ export default function AmlTab() {
             </Grid>
           </Card>
 
-          {/* RISK SCORE — КАК НА СКРИНЕ */}
-<Card>
-  <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 1 }}>
+          <Card>
+  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
     <Typography
       sx={{
         color: data.riskColor,
-        fontSize: 38,
+        fontSize: 23,      // раньше было 38
         fontWeight: 900,
         fontFamily: "IBM Plex Mono, monospace",
         mr: 3,
@@ -424,7 +423,7 @@ export default function AmlTab() {
     <Typography
       sx={{
         color: data.riskColor,
-        fontSize: 38,
+        fontSize: 23,      // раньше было 38
         fontWeight: 900,
         fontFamily: "IBM Plex Mono, monospace",
         ml: 2,
@@ -438,15 +437,15 @@ export default function AmlTab() {
     sx={{
       color: ACCENT,
       fontFamily: "IBM Plex Mono, monospace",
-      fontSize: 24,
-      mb: 2.2,
+      fontSize: 17,     // было 24
+      mb: 1.2,
       mt: 0,
       fontWeight: 500,
     }}
   >
     {data.riskMsg}
   </Typography>
-  <Box sx={{ display: "flex", gap: 4, mt: 1 }}>
+  <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
     {data.riskDistribution.map((risk) => (
       <RiskBadge borderColor={risk.color} key={risk.label}>
         <Typography
@@ -454,7 +453,7 @@ export default function AmlTab() {
             color: risk.color,
             fontWeight: 700,
             fontFamily: "IBM Plex Mono, monospace",
-            fontSize: 32,
+            fontSize: 19,     // было 32
           }}
         >
           {risk.label}
@@ -463,7 +462,7 @@ export default function AmlTab() {
           sx={{
             color: "#c75b23",
             fontFamily: "IBM Plex Mono, monospace",
-            fontSize: 24,
+            fontSize: 15,     // было 24
           }}
         >
           {risk.percent}%
