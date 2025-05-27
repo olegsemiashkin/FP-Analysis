@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
+// Цвета и стили
 const ACCENT = "#c75b23";
 const BG = "#fff6f2";
 const CARD = "#fff";
@@ -21,60 +22,54 @@ const ORANGE = "#ffb300";
 
 const Card = styled(Paper)({
   background: CARD,
-  borderRadius: 24,
+  borderRadius: 22,
   boxShadow: "none",
   border: `2px solid ${BORDER}`,
   padding: 32,
-  marginBottom: 22,
-});
-
-const Label = styled(Typography)({
-  fontFamily: "IBM Plex Mono, monospace",
-  color: ACCENT,
-  fontSize: 19,
-  fontWeight: 600,
+  marginBottom: 24,
 });
 
 const RiskCircle = styled(Box)(({ riskColor }) => ({
-  width: 138,
-  height: 138,
+  width: 110,
+  height: 110,
   borderRadius: "50%",
-  border: `6px solid ${riskColor}`,
+  border: `5px solid ${riskColor}`,
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  margin: "0 auto 10px auto",
   background: "#fff",
+  margin: "0 auto",
 }));
 
 const ScoreNum = styled(Typography)(({ riskColor }) => ({
-  fontFamily: "IBM Plex Mono, monospace",
   color: riskColor,
-  fontWeight: 900,
-  fontSize: 58,
-  lineHeight: "54px",
+  fontWeight: 800,
+  fontFamily: "IBM Plex Mono, monospace",
+  fontSize: 48,
+  lineHeight: "40px",
 }));
 
 const ScoreLabel = styled(Typography)(({ riskColor }) => ({
-  fontFamily: "IBM Plex Mono, monospace",
   color: riskColor,
   fontWeight: 700,
-  fontSize: 26,
-  marginTop: 4,
-  textAlign: "center",
+  fontFamily: "IBM Plex Mono, monospace",
+  fontSize: 18,
+  marginTop: 6,
+  letterSpacing: 0.1,
 }));
 
 const RiskBadge = styled(Box)(({ borderColor }) => ({
-  border: `4px solid ${borderColor}`,
+  border: `3px solid ${borderColor}`,
   borderRadius: 100,
-  px: 5,
-  py: 1.5,
+  padding: "10px 30px",
   textAlign: "center",
-  minWidth: 210,
-  margin: "0 16px 16px 0",
   background: "#fff",
-  display: "inline-block",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  minWidth: 150,
+  margin: "0 14px",
 }));
 
 const LinkBtn = styled(Button)({
@@ -85,8 +80,8 @@ const LinkBtn = styled(Button)({
   fontFamily: "IBM Plex Mono, monospace",
   borderRadius: 12,
   margin: "8px 0",
-  minWidth: 140,
-  fontSize: 20,
+  minWidth: 130,
+  fontSize: 18,
   textTransform: "none",
   "&:hover": {
     background: "#ffe7d2",
@@ -119,7 +114,7 @@ function detectNetwork(address) {
 }
 
 async function fetchBlacklists() {
-  // Все публичные github/spisok — можно добавлять ещё!
+  // Публичные github/spisok (можно добавлять ещё)
   const urls = [
     "https://raw.githubusercontent.com/AMLBot/blacklists/main/blacklist.txt",
     "https://raw.githubusercontent.com/crystal-blockchain/public-aml-addresses/master/blacklist.txt",
@@ -168,7 +163,6 @@ function getRiskScore({ isBlacklisted, totalTransactions }) {
       label: "High Risk",
       color: RED,
       msg: "High risk of blocking. Transfers from this wallet may be blocked on centralized exchanges. We recommend contacting an AML officer.",
-      blacklisted: true,
     };
   if (
     typeof totalTransactions === "number" &&
@@ -179,14 +173,12 @@ function getRiskScore({ isBlacklisted, totalTransactions }) {
       label: "Medium Risk",
       color: ORANGE,
       msg: "Medium risk. Suspicious transaction count for typical activity.",
-      blacklisted: false,
     };
   return {
     score: 9,
     label: "Trusted",
     color: GREEN,
     msg: "This wallet is generally considered safe.",
-    blacklisted: false,
   };
 }
 
@@ -209,7 +201,7 @@ export default function AmlTab() {
       return;
     }
 
-    // 1. Получаем все blacklist-адреса:
+    // Получаем все blacklist-адреса
     let isBlacklisted = false;
     let totalTransactions = null;
     try {
@@ -222,7 +214,7 @@ export default function AmlTab() {
       }
     } catch (e) {}
 
-    // 2. Фетчим реальные данные с блокчейна:
+    // Фетчим реальные данные с блокчейна
     let firstTransaction = "-",
       lastActive = "-",
       totalReceived = "-",
@@ -314,7 +306,7 @@ export default function AmlTab() {
           sx={{
             fontFamily: "IBM Plex Mono, monospace",
             color: ACCENT,
-            fontSize: 26,
+            fontSize: 28,
             fontWeight: 700,
             mb: 1,
             letterSpacing: 0.5,
@@ -328,7 +320,7 @@ export default function AmlTab() {
             color: ACCENT,
             fontFamily: "IBM Plex Mono, monospace",
             mb: 3,
-            fontSize: 16,
+            fontSize: 17,
           }}
         >
           Enter a BTC, ETH, LTC, BCH, DOGE, DASH, ZEC, or XRP address to check its transaction history and risk score.
@@ -365,9 +357,9 @@ export default function AmlTab() {
               sx={{
                 background: ACCENT,
                 color: "#fff",
-                fontWeight: 600,
+                fontWeight: 700,
                 fontFamily: "IBM Plex Mono, monospace",
-                fontSize: 18,
+                fontSize: 20,
                 borderRadius: 10,
                 textTransform: "none",
                 py: 1.4,
@@ -379,7 +371,7 @@ export default function AmlTab() {
           </Grid>
         </Grid>
         {err && (
-          <Typography color="error" sx={{ mt: 2, fontFamily: "IBM Plex Mono, monospace" }}>
+          <Typography color="error" sx={{ mt: 2, fontFamily: "IBM Plex Mono, monospace", fontSize: 19 }}>
             {err}
           </Typography>
         )}
@@ -390,9 +382,9 @@ export default function AmlTab() {
           <Card>
             <Grid container alignItems="center" spacing={2}>
               <Grid item xs={12} md={9}>
-                <Label sx={{ fontWeight: 700, fontSize: 22 }}>
+                <Typography sx={{ fontWeight: 700, fontSize: 22, color: ACCENT, fontFamily: "IBM Plex Mono, monospace" }}>
                   Address ({data.network})
-                </Label>
+                </Typography>
                 <Typography
                   sx={{
                     fontFamily: "IBM Plex Mono, monospace",
@@ -406,9 +398,9 @@ export default function AmlTab() {
                 </Typography>
               </Grid>
               <Grid item xs={12} md={3} sx={{ textAlign: "right" }}>
-                <Label sx={{ fontWeight: 700, fontSize: 20 }}>
+                <Typography sx={{ fontWeight: 700, fontSize: 20, color: ACCENT, fontFamily: "IBM Plex Mono, monospace" }}>
                   Transactions
-                </Label>
+                </Typography>
                 <Chip
                   label={data.totalTransactions}
                   sx={{
@@ -434,13 +426,14 @@ export default function AmlTab() {
                   <ScoreLabel riskColor={data.riskColor}>{data.riskLabel}</ScoreLabel>
                 </RiskCircle>
               </Grid>
-              <Grid item xs={12} md={8}>
+              <Grid item xs={12} md={8} sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <Typography
                   sx={{
                     color: data.riskColor,
                     fontFamily: "IBM Plex Mono, monospace",
                     fontWeight: 700,
-                    fontSize: 25,
+                    fontSize: 23,
+                    mb: 1,
                   }}
                 >
                   {data.riskMsg.split(".")[0]}
@@ -449,7 +442,7 @@ export default function AmlTab() {
                   sx={{
                     color: ACCENT,
                     fontFamily: "IBM Plex Mono, monospace",
-                    fontSize: 16,
+                    fontSize: 15.5,
                     mb: 2,
                   }}
                 >
@@ -458,18 +451,20 @@ export default function AmlTab() {
                 <Box
                   sx={{
                     display: "flex",
-                    gap: 3,
-                    justifyContent: { xs: "flex-start", md: "flex-start" },
-                    flexWrap: "wrap",
-                    mt: 3,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    gap: 1.5,
+                    mt: 2,
                   }}
                 >
                   {data.riskDistribution.map((risk) => (
                     <RiskBadge borderColor={risk.color} key={risk.label}>
-                      <Typography sx={{ color: risk.color, fontWeight: 700, fontFamily: "IBM Plex Mono, monospace", fontSize: 23 }}>
+                      <Typography sx={{ color: risk.color, fontWeight: 700, fontFamily: "IBM Plex Mono, monospace", fontSize: 20, mb: -1 }}>
                         {risk.label}
                       </Typography>
-                      <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontSize: 20 }}>
+                      <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontSize: 17 }}>
                         {risk.percent}%
                       </Typography>
                     </RiskBadge>
@@ -483,27 +478,39 @@ export default function AmlTab() {
           <Card>
             <Grid container spacing={2}>
               <Grid item xs={12} md={4}>
-                <Label>First Transaction</Label>
+                <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontWeight: 600 }}>
+                  First Transaction
+                </Typography>
                 <Typography>{data.firstTransaction}</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Label>Last Active</Label>
+                <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontWeight: 600 }}>
+                  Last Active
+                </Typography>
                 <Typography>{data.lastActive}</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Label>Received</Label>
+                <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontWeight: 600 }}>
+                  Received
+                </Typography>
                 <Typography>{data.totalReceived}</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Label>Sent</Label>
+                <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontWeight: 600 }}>
+                  Sent
+                </Typography>
                 <Typography>{data.totalSent}</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Label>Total Transactions</Label>
+                <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontWeight: 600 }}>
+                  Total Transactions
+                </Typography>
                 <Typography>{data.totalTransactions}</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Label>Unique Interactions</Label>
+                <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontWeight: 600 }}>
+                  Unique Interactions
+                </Typography>
                 <Typography>{data.uniqueInteractions}</Typography>
               </Grid>
             </Grid>
