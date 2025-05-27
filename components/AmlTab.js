@@ -406,92 +406,59 @@ export default function AmlTab() {
             </Grid>
           </Card>
 
-          {/* RISK SCORE — INLINE, КОМПАКТНО */}
-          <Card>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
-              <Typography
-                sx={{
-                  color: data.riskColor,
-                  fontSize: 22,
-                  fontWeight: 900,
-                  fontFamily: "IBM Plex Mono, monospace",
-                  mr: 1,
-                  lineHeight: 1.1,
-                }}
-              >
-                {data.riskLabel}
-              </Typography>
-              <Typography
-                sx={{
-                  color: data.riskColor,
-                  fontSize: 21,
-                  fontWeight: 900,
-                  fontFamily: "IBM Plex Mono, monospace",
-                  mr: 0.5,
-                }}
-              >
-                {data.riskScore}
-              </Typography>
-              <Typography
-                sx={{
-                  color: data.riskColor,
-                  fontSize: 17,
-                  fontWeight: 700,
-                  fontFamily: "IBM Plex Mono, monospace",
-                  mx: 0.5,
-                }}
-              >
-                /10
-              </Typography>
-              <Typography
-                sx={{
-                  color: data.riskColor,
-                  fontSize: 20,
-                  fontWeight: 900,
-                  fontFamily: "IBM Plex Mono, monospace",
-                  ml: 2,
-                }}
-              >
-                {data.riskPercent}%
-              </Typography>
-            </Box>
-            <Typography
-              sx={{
-                color: ACCENT,
-                fontFamily: "IBM Plex Mono, monospace",
-                fontSize: 15,
-                mb: 1.2,
-                mt: 0,
-              }}
-            >
-              {data.riskMsg}
-            </Typography>
-            <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
-              {data.riskDistribution.map((risk) => (
-                <RiskBadge borderColor={risk.color} key={risk.label}>
-                  <Typography
-                    sx={{
-                      color: risk.color,
-                      fontWeight: 700,
-                      fontFamily: "IBM Plex Mono, monospace",
-                      fontSize: 18,
-                    }}
-                  >
-                    {risk.label}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: "#c75b23",
-                      fontFamily: "IBM Plex Mono, monospace",
-                      fontSize: 14,
-                    }}
-                  >
-                    {risk.percent}%
-                  </Typography>
-                </RiskBadge>
-              ))}
-            </Box>
-          </Card>
+          {/* RISK SCORE — INLINE, ТОЛЬКО ПРОЦЕНТ */}
+<Card>
+  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+    <Typography
+      sx={{
+        color: data.riskColor,
+        fontSize: 38,
+        fontWeight: 900,
+        fontFamily: "IBM Plex Mono, monospace",
+        lineHeight: 1.1,
+        letterSpacing: 1.2,
+      }}
+    >
+      {data.riskPercent}%
+    </Typography>
+  </Box>
+  <Typography
+    sx={{
+      color: ACCENT,
+      fontFamily: "IBM Plex Mono, monospace",
+      fontSize: 15,
+      mb: 1.2,
+      mt: 0,
+    }}
+  >
+    {data.riskMsg}
+  </Typography>
+  <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+    {data.riskDistribution.map((risk) => (
+      <RiskBadge borderColor={risk.color} key={risk.label}>
+        <Typography
+          sx={{
+            color: risk.color,
+            fontWeight: 700,
+            fontFamily: "IBM Plex Mono, monospace",
+            fontSize: 18,
+          }}
+        >
+          {risk.label}
+        </Typography>
+        <Typography
+          sx={{
+            color: "#c75b23",
+            fontFamily: "IBM Plex Mono, monospace",
+            fontSize: 14,
+          }}
+        >
+          {risk.percent}%
+        </Typography>
+      </RiskBadge>
+    ))}
+  </Box>
+</Card>
 
           {/* Инфо по транзакциям */}
           <Card>
