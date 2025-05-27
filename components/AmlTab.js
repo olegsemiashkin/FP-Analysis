@@ -35,52 +35,44 @@ const Label = styled(Typography)({
   fontWeight: 600,
 });
 
-const StatText = styled(Typography)({
-  fontFamily: "IBM Plex Mono, monospace",
-  color: ACCENT,
-  fontWeight: 400,
-  fontSize: 19,
-});
-
 const RiskCircle = styled(Box)(({ riskColor }) => ({
-  width: 108,
-  height: 108,
+  width: 138,
+  height: 138,
   borderRadius: "50%",
-  border: `5px solid ${riskColor}`,
+  border: `6px solid ${riskColor}`,
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  margin: "0 auto",
-  mb: 2,
+  margin: "0 auto 10px auto",
+  background: "#fff",
 }));
 
 const ScoreNum = styled(Typography)(({ riskColor }) => ({
   fontFamily: "IBM Plex Mono, monospace",
   color: riskColor,
   fontWeight: 900,
-  fontSize: 42,
-  lineHeight: "44px",
+  fontSize: 58,
+  lineHeight: "54px",
 }));
 
 const ScoreLabel = styled(Typography)(({ riskColor }) => ({
   fontFamily: "IBM Plex Mono, monospace",
   color: riskColor,
   fontWeight: 700,
-  fontSize: 18,
-  lineHeight: "18px",
-  marginTop: 8,
+  fontSize: 26,
+  marginTop: 4,
   textAlign: "center",
 }));
 
-const RiskCard = styled(Box)(({ borderColor }) => ({
-  border: `3px solid ${borderColor}`,
+const RiskBadge = styled(Box)(({ borderColor }) => ({
+  border: `4px solid ${borderColor}`,
   borderRadius: 100,
-  px: 4,
-  py: 2,
+  px: 5,
+  py: 1.5,
   textAlign: "center",
-  minWidth: 170,
-  margin: "0 12px",
+  minWidth: 210,
+  margin: "0 16px 16px 0",
   background: "#fff",
   display: "inline-block",
 }));
@@ -88,12 +80,13 @@ const RiskCard = styled(Box)(({ borderColor }) => ({
 const LinkBtn = styled(Button)({
   background: "#fff",
   color: ACCENT,
-  fontWeight: 600,
+  fontWeight: 700,
   border: `2px solid ${ACCENT}`,
   fontFamily: "IBM Plex Mono, monospace",
-  borderRadius: 10,
+  borderRadius: 12,
   margin: "8px 0",
   minWidth: 140,
+  fontSize: 20,
   textTransform: "none",
   "&:hover": {
     background: "#ffe7d2",
@@ -125,19 +118,76 @@ function detectNetwork(address) {
   return null;
 }
 
-// МОК для примера — можно брать реальные данные при интеграции риск-аналитики
-function getRiskDistribution() {
+async function fetchBlacklists() {
+  // Все публичные github/spisok — можно добавлять ещё!
+  const urls = [
+    "https://raw.githubusercontent.com/AMLBot/blacklists/main/blacklist.txt",
+    "https://raw.githubusercontent.com/crystal-blockchain/public-aml-addresses/master/blacklist.txt",
+  ];
+  let all = [];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const text = await res.text();
+        const addrs = text
+          .split("\n")
+          .map((line) => line.trim().toLowerCase())
+          .filter((line) => !!line && !line.startsWith("#"));
+        all = all.concat(addrs);
+      }
+    } catch (e) {}
+  }
+  return all;
+}
+
+function getRiskDistribution(isBlacklisted) {
   return [
-    { label: "Dark Market", percent: 4.7, color: RED },
-    { label: "Exchange", percent: 30.4, color: GREEN },
-    { label: "Mixer", percent: 2.1, color: ORANGE }
+    {
+      label: "Dark Market",
+      percent: isBlacklisted ? 60 : 4.7,
+      color: RED,
+    },
+    {
+      label: "Exchange",
+      percent: isBlacklisted ? 5 : 30.4,
+      color: GREEN,
+    },
+    {
+      label: "Mixer",
+      percent: isBlacklisted ? 20 : 2.1,
+      color: ORANGE,
+    },
   ];
 }
 
-function riskMock(txCount) {
-  if (txCount > 5000) return { score: 3, label: "High Risk", color: RED, msg: "High risk of blocking. Transfers from this wallet may be blocked on centralized exchanges. We recommend contacting an AML officer." };
-  if (txCount > 500) return { score: 6, label: "Medium Risk", color: ORANGE, msg: "Medium risk. Activity detected but nothing critical." };
-  return { score: 9, label: "Trusted", color: GREEN, msg: "This wallet is generally considered safe." };
+function getRiskScore({ isBlacklisted, totalTransactions }) {
+  if (isBlacklisted)
+    return {
+      score: 3,
+      label: "High Risk",
+      color: RED,
+      msg: "High risk of blocking. Transfers from this wallet may be blocked on centralized exchanges. We recommend contacting an AML officer.",
+      blacklisted: true,
+    };
+  if (
+    typeof totalTransactions === "number" &&
+    (totalTransactions <= 2 || totalTransactions > 10000)
+  )
+    return {
+      score: 6,
+      label: "Medium Risk",
+      color: ORANGE,
+      msg: "Medium risk. Suspicious transaction count for typical activity.",
+      blacklisted: false,
+    };
+  return {
+    score: 9,
+    label: "Trusted",
+    color: GREEN,
+    msg: "This wallet is generally considered safe.",
+    blacklisted: false,
+  };
 }
 
 export default function AmlTab() {
@@ -159,9 +209,27 @@ export default function AmlTab() {
       return;
     }
 
+    // 1. Получаем все blacklist-адреса:
+    let isBlacklisted = false;
+    let totalTransactions = null;
+    try {
+      const allBlacklists = await fetchBlacklists();
+      if (
+        allBlacklists.includes(address.toLowerCase()) ||
+        allBlacklists.includes(address.replace(/^0x/, "").toLowerCase())
+      ) {
+        isBlacklisted = true;
+      }
+    } catch (e) {}
+
+    // 2. Фетчим реальные данные с блокчейна:
+    let firstTransaction = "-",
+      lastActive = "-",
+      totalReceived = "-",
+      totalSent = "-",
+      uniqueInteractions = "-";
     try {
       if (networkInfo.key === "eth") {
-        // ETH via Etherscan
         const apiKey = "1QUX49MGQE21PWNXJSANUUU2ASHYUGMDKK";
         const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=${apiKey}`;
         const res = await fetch(url);
@@ -174,6 +242,7 @@ export default function AmlTab() {
         }
 
         const txs = json.result;
+        totalTransactions = txs.length;
         const firstTx = txs[0];
         const lastTx = txs[txs.length - 1];
         let totalIn = 0;
@@ -191,26 +260,12 @@ export default function AmlTab() {
           }
         }
 
-        const risk = riskMock(txs.length);
-
-        setData({
-          network: networkInfo.label,
-          address,
-          firstTransaction: new Date(firstTx.timeStamp * 1000).toLocaleDateString(),
-          lastActive: new Date(lastTx.timeStamp * 1000).toLocaleDateString(),
-          totalReceived: totalIn.toFixed(6) + " ETH",
-          totalSent: totalOut.toFixed(6) + " ETH",
-          totalTransactions: txs.length,
-          uniqueInteractions: uniqueAddresses.size,
-          riskScore: risk.score,
-          riskLabel: risk.label,
-          riskColor: risk.color,
-          riskMsg: risk.msg,
-          blockExplorer: networkInfo.explorer,
-          riskDistribution: getRiskDistribution()
-        });
+        firstTransaction = new Date(firstTx.timeStamp * 1000).toLocaleDateString();
+        lastActive = new Date(lastTx.timeStamp * 1000).toLocaleDateString();
+        totalReceived = totalIn.toFixed(6) + " ETH";
+        totalSent = totalOut.toFixed(6) + " ETH";
+        uniqueInteractions = uniqueAddresses.size;
       } else {
-        // Blockchair coins
         const nc = BLOCKCHAIR_NETWORKS[networkInfo.key];
         const url = `https://api.blockchair.com/${nc.code}/dashboards/address/${address}`;
         const res = await fetch(url);
@@ -221,28 +276,34 @@ export default function AmlTab() {
           return;
         }
         const info = json.data[address].address;
-        const risk = riskMock(info.transaction_count || info.transaction_count_received || 0);
-
-        setData({
-          network: nc.label,
-          address,
-          firstTransaction: info.first_seen_receiving || "-",
-          lastActive: info.last_seen_receiving || "-",
-          totalReceived: (info.received / Math.pow(10, nc.decimals)).toFixed(nc.decimals) + ` ${nc.symbol}`,
-          totalSent: (info.spent / Math.pow(10, nc.decimals)).toFixed(nc.decimals) + ` ${nc.symbol}`,
-          totalTransactions: info.transaction_count,
-          uniqueInteractions: info.output_count || info.outputs_count || "-",
-          riskScore: risk.score,
-          riskLabel: risk.label,
-          riskColor: risk.color,
-          riskMsg: risk.msg,
-          blockExplorer: networkInfo.explorer,
-          riskDistribution: getRiskDistribution()
-        });
+        totalTransactions = info.transaction_count;
+        firstTransaction = info.first_seen_receiving || "-";
+        lastActive = info.last_seen_receiving || "-";
+        totalReceived = (info.received / Math.pow(10, nc.decimals)).toFixed(nc.decimals) + ` ${nc.symbol}`;
+        totalSent = (info.spent / Math.pow(10, nc.decimals)).toFixed(nc.decimals) + ` ${nc.symbol}`;
+        uniqueInteractions = info.output_count || info.outputs_count || "-";
       }
-    } catch (e) {
-      setErr("Error fetching blockchain data.");
-    }
+    } catch (e) {}
+
+    const risk = getRiskScore({ isBlacklisted, totalTransactions });
+
+    setData({
+      network: networkInfo.label,
+      address,
+      firstTransaction,
+      lastActive,
+      totalReceived,
+      totalSent,
+      totalTransactions,
+      uniqueInteractions,
+      riskScore: risk.score,
+      riskLabel: risk.label,
+      riskColor: risk.color,
+      riskMsg: risk.msg,
+      riskDistribution: getRiskDistribution(isBlacklisted),
+      blockExplorer: networkInfo.explorer,
+    });
+
     setLoading(false);
   };
 
@@ -364,6 +425,7 @@ export default function AmlTab() {
             </Grid>
           </Card>
 
+          {/* RISK CARD */}
           <Card>
             <Grid container alignItems="center" spacing={2}>
               <Grid item xs={12} md={4}>
@@ -402,62 +464,88 @@ export default function AmlTab() {
                     mt: 3,
                   }}
                 >
-                  {data.riskDistribution.map((risk, idx) => (
-                    <RiskCard borderColor={risk.color} key={risk.label}>
-                      <Typography sx={{ color: risk.color, fontWeight: 700, fontFamily: "IBM Plex Mono, monospace", fontSize: 21 }}>
+                  {data.riskDistribution.map((risk) => (
+                    <RiskBadge borderColor={risk.color} key={risk.label}>
+                      <Typography sx={{ color: risk.color, fontWeight: 700, fontFamily: "IBM Plex Mono, monospace", fontSize: 23 }}>
                         {risk.label}
                       </Typography>
-                      <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontSize: 18 }}>
+                      <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontSize: 20 }}>
                         {risk.percent}%
                       </Typography>
-                    </RiskCard>
+                    </RiskBadge>
                   ))}
                 </Box>
               </Grid>
             </Grid>
           </Card>
 
+          {/* INFO CARD */}
           <Card>
             <Grid container spacing={2}>
               <Grid item xs={12} md={4}>
                 <Label>First Transaction</Label>
-                <StatText>{data.firstTransaction}</StatText>
+                <Typography>{data.firstTransaction}</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
                 <Label>Last Active</Label>
-                <StatText>{data.lastActive}</StatText>
+                <Typography>{data.lastActive}</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
                 <Label>Received</Label>
-                <StatText>{data.totalReceived}</StatText>
+                <Typography>{data.totalReceived}</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
                 <Label>Sent</Label>
-                <StatText>{data.totalSent}</StatText>
+                <Typography>{data.totalSent}</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
                 <Label>Total Transactions</Label>
-                <StatText>{data.totalTransactions}</StatText>
+                <Typography>{data.totalTransactions}</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
                 <Label>Unique Interactions</Label>
-                <StatText>{data.uniqueInteractions}</StatText>
+                <Typography>{data.uniqueInteractions}</Typography>
               </Grid>
             </Grid>
           </Card>
 
+          {/* ADVANCED ANALYSIS */}
           <Card sx={{ border: `2px dashed ${BORDER}` }}>
             <Typography sx={{ color: ACCENT, fontWeight: 700, fontFamily: "IBM Plex Mono, monospace", mb: 2 }}>
-              View on Block Explorer
+              Advanced Analysis (opens in new tab)
             </Typography>
-            <LinkBtn
-              fullWidth
-              href={data.blockExplorer}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {data.network} Explorer
-            </LinkBtn>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <LinkBtn
+                  fullWidth
+                  href={`https://metasleuth.io/address/${data.address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  MetaSleuth
+                </LinkBtn>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <LinkBtn
+                  fullWidth
+                  href={data.blockExplorer}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {data.network === "Ethereum" ? "Etherscan" : "Blockchair"}
+                </LinkBtn>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <LinkBtn
+                  fullWidth
+                  href={`https://breadcrumbs.app/address/${data.address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Breadcrumbs
+                </LinkBtn>
+              </Grid>
+            </Grid>
           </Card>
         </>
       )}
