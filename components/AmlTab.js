@@ -416,31 +416,35 @@ export default function AmlTab() {
           <Card>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 4, flexWrap: "wrap" }}>
               {/* Слева — risk score */}
-              <RiskCircle riskColor={data.riskColor}>
-                <Typography
-                  sx={{
-                    color: data.riskColor,
-                    fontSize: 72,
-                    fontWeight: 900,
-                    lineHeight: 1,
-                    fontFamily: "IBM Plex Mono, monospace",
-                  }}
-                >
-                  {data.riskScore}
-                </Typography>
-                <Typography
-                  sx={{
-                    color: data.riskColor,
-                    fontSize: 28,
-                    fontWeight: 700,
-                    letterSpacing: 1,
-                    fontFamily: "IBM Plex Mono, monospace",
-                    mt: 1,
-                  }}
-                >
-                  {data.riskLabel}
-                </Typography>
-              </RiskCircle>
+<RiskCircle riskColor={data.riskColor}>
+  <Typography
+    sx={{
+      color: data.riskColor,
+      fontSize: 48,
+      fontWeight: 900,
+      fontFamily: "IBM Plex Mono, monospace",
+      lineHeight: 1,
+      mb: 0.5,
+      textAlign: "center"
+    }}
+  >
+    {data.riskScore}
+  </Typography>
+  <Typography
+    sx={{
+      color: data.riskColor,
+      fontSize: 18,
+      fontWeight: 700,
+      fontFamily: "IBM Plex Mono, monospace",
+      textAlign: "center",
+      mt: 0,
+      lineHeight: 1.1,
+      letterSpacing: 0.5,
+    }}
+  >
+    {data.riskLabel}
+  </Typography>
+</RiskCircle>
 
               {/* Центр/справа — текст и светофор */}
               <Box sx={{ minWidth: 350 }}>
