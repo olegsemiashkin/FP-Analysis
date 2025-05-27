@@ -57,7 +57,7 @@ const SecondaryLabel = ({ children, tip }) => (
     </Typography>
     {tip && (
       <Tooltip title={tip}>
-        <InfoOutlinedIcon sx={{ fontSize: 15, color: "#555" }} />
+        <InfoIcon sx={{ fontSize: 15, color: "#555" }} />
       </Tooltip>
     )}
   </Box>
