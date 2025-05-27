@@ -1,8 +1,9 @@
-# 🕵️‍♂️ Inspectify: Bulk IP Fraud & AML Analyzer
+# 🕵️‍♂️ Inspectify: Bulk IP & Crypto Address AML Analyzer
 
-**Inspectify** is a modern online tool for analyzing IP addresses, designed for anti-fraud, AML (Anti-Money Laundering), and cybersecurity tasks.
+**Inspectify** is a modern online tool for analyzing IP addresses **and cryptocurrency wallets** — designed for anti-fraud, AML (Anti-Money Laundering), and cybersecurity professionals.
 
-🌐 **Demo:** [https://inspectify-sepia.vercel.app/](https://inspectify-cyan.vercel.app/)
+🌐 **Live Demo:** [https://inspectify-cyan.vercel.app/](https://inspectify-cyan.vercel.app/)  
+💻 **GitHub:** [https://github.com/olegsemiashkin/Inspectify](https://github.com/olegsemiashkin/Inspectify)
 
 ---
 
@@ -10,49 +11,65 @@
 
 ### **Bulk IP Check** Tab
 - **Mass IP Analysis** — Upload up to 50 IP addresses at once to instantly get an extended report on each.
-- **Key Insights**: country, city, ISP, VPN status, Proxy, TOR, Fraud Score, recent abuse flags, and other risk factors.
-- **Details** — Click "Details" to view a full JSON report with additional attributes for advanced users.
-- **Automatic Extraction** — The service automatically finds and extracts IP addresses from any pasted text, regardless of format.
+- **Key Insights**: country, city, ISP, VPN, Proxy, TOR, Fraud Score, abuse flags, and other risk factors.
+- **Details** — Click "Details" to view a full JSON report for advanced users.
+- **Automatic Extraction** — Instantly extracts IP addresses from any pasted text.
+
+### **Crypto Address AML Analysis** Tab  *(NEW!)*
+- **Supports all major blockchains:** BTC, ETH, LTC, BCH, DOGE, DASH, ZEC, XRP.
+- **Risk Score** — Instantly see if an address is “Trusted”, “Medium Risk”, or “High Risk” based on public blacklists and transaction patterns.
+- **Risk breakdown** — Analysis by category: Dark Market, Mixer, Exchange, etc.
+- **Live transaction stats** — Get key info: total transactions, unique interactions, first/last activity, received/sent funds.
+- **One click to advanced tools:** Easily open MetaSleuth, Etherscan, Blockchair, Breadcrumbs for deeper investigations.
+- **Open-source logic** — No API key required for blockchains except ETH; analysis is based on open, public data.
 
 ### Device Analysis *(in development)*
 - Analyze device fingerprint, browser, OS, and hidden parameters.
 
+---
+
 ## 🛡️ Who is this for?
 
-- **Anti-Fraud**: Instantly detect suspicious connections, anonymizers, proxies, and bypass tools.
-- **AML**: Accelerate manual and automated KYC/AML checks by flagging risky IPs, VPNs, and proxies.
-- **Cybersecurity**: Prevent attacks, phishing, click fraud, and other risks associated with anonymous or high-risk IP addresses.
-- **Traffic Quality**: Quickly detect bots and click-fraud in advertising or affiliate traffic.
+- **Anti-Fraud:** Detect suspicious IPs, wallets, anonymizers, risky crypto funds, and bypass tools.
+- **AML:** Speed up KYC/AML checks by flagging risky IPs and wallet addresses.
+- **Cybersecurity:** Prevent attacks, phishing, and fraud from high-risk sources.
+- **Traffic Quality:** Filter bots and click-fraud in ad or affiliate traffic.
+
+---
 
 ## 🤖 How does it work?
 
-- For each IP, the tool combines data from multiple services (e.g., IPinfo and IPQualityScore) to deliver a comprehensive risk profile.
-- Checks include: **country, city, ISP, VPN, Proxy, TOR, Abuse, Fraud Score, organization, connection type**, and more.
-- In-depth fraud intelligence and up-to-date abuse history.
+- **IP Analysis:** Combines data from multiple APIs (IPinfo, IPQualityScore, etc.) for each address.
+- **Crypto AML:** Checks every crypto wallet address against public blacklists, risk sources, and fetches transaction history in real-time.
+- **No registration required.** Just paste, analyze, and get results.
+
+---
 
 ## ⚡ Example Use Cases
 
-- Bulk screening of customer IPs before onboarding/AML.
-- Fast filtering of traffic from partners or affiliate networks.
-- Manual or automated analysis of incidents and attacks.
+- Bulk screening of customer IPs and wallet addresses before onboarding/AML.
+- Fast filtering of affiliate traffic and new users for fraud/AML risk.
+- Manual or automated analysis of incidents, crypto fund flows, and attacks.
 
 ---
 
 ## 🔒 Disclaimer
 
-Inspectify is a research project and does not guarantee 100% accuracy (data is sourced from third-party/open and commercial APIs and may change).
+Inspectify is a research and demo project; results may depend on third-party and public APIs, which can change.
 
 ---
 
 ## 👨‍💻 Roadmap
 
-- Expand the **Device Analysis** tab (fingerprinting, cookies, browser details)
-- Email and phone enrichment, OSINT features
-- Report export (CSV, PDF)
+- Further improve Crypto AML tab (multi-chain support, more heuristics)
+- Expand Device Analysis tab (fingerprinting, browser details)
+- OSINT, email/phone enrichment, export (CSV, PDF)
 - Telegram bot integration
 
 ---
 
 **Open for collaboration and further development — suggestions are welcome!**
 
-[GitHub Project](https://github.com/olegsemiashkin/FP-Analysis)
+---
+
+> _This project is open-source. Feel free to use, fork, and contribute!_
