@@ -7,29 +7,31 @@ import {
   Grid,
   Chip,
   CircularProgress,
-  Paper
+  Paper,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import InfoIcon from "@mui/icons-material/Info";
 
 const ACCENT = "#c75b23";
 const BG = "#fff6f2";
 const CARD = "#fff";
-const BORDER = "#f7c89e";
+const BORDER = "#facfad";
+const RED = "#e03c1a";
+const GREEN = "#4caf50";
+const ORANGE = "#ffb300";
 
-const Card = styled(Paper)(({ theme }) => ({
+const Card = styled(Paper)({
   background: CARD,
-  borderRadius: 16,
+  borderRadius: 24,
   boxShadow: "none",
   border: `2px solid ${BORDER}`,
-  padding: theme.spacing(3),
-  marginBottom: theme.spacing(2),
-}));
+  padding: 32,
+  marginBottom: 22,
+});
 
 const Label = styled(Typography)({
   fontFamily: "IBM Plex Mono, monospace",
   color: ACCENT,
-  fontSize: 16,
+  fontSize: 19,
   fontWeight: 600,
 });
 
@@ -37,50 +39,35 @@ const StatText = styled(Typography)({
   fontFamily: "IBM Plex Mono, monospace",
   color: ACCENT,
   fontWeight: 400,
-  fontSize: 18,
+  fontSize: 19,
 });
 
 const RiskCircle = styled(Box)(({ riskColor }) => ({
-  width: 72,
-  height: 72,
+  width: 88,
+  height: 88,
   borderRadius: "50%",
-  background: "#fff6f2",
-  border: `3px solid ${riskColor}`,
+  border: `4px solid ${riskColor}`,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   flexDirection: "column",
-  margin: "auto"
+  margin: "0 auto 16px auto",
 }));
 
 const ScoreText = styled(Typography)(({ riskColor }) => ({
   fontFamily: "IBM Plex Mono, monospace",
   color: riskColor,
   fontWeight: 700,
-  fontSize: 26,
+  fontSize: 28,
 }));
 
 const RiskLabel = styled(Typography)(({ riskColor }) => ({
   fontFamily: "IBM Plex Mono, monospace",
   color: riskColor,
   fontWeight: 700,
-  fontSize: 18,
+  fontSize: 19,
   marginTop: 4,
 }));
-
-const AccentButton = styled(Button)({
-  background: ACCENT,
-  color: "#fff",
-  fontWeight: 600,
-  fontFamily: "IBM Plex Mono, monospace",
-  fontSize: 18,
-  borderRadius: 10,
-  textTransform: "none",
-  marginLeft: 8,
-  "&:hover": {
-    background: "#a84e1a",
-  },
-});
 
 const LinkBtn = styled(Button)({
   background: "#fff",
@@ -95,21 +82,46 @@ const LinkBtn = styled(Button)({
   "&:hover": {
     background: "#ffe7d2",
     borderColor: "#a84e1a",
-    color: "#a84e1a"
+    color: "#a84e1a",
   },
 });
 
-const mockRiskData = {
-  score: 3,
-  label: "High Risk",
-  color: "#e03c1a",
-  message: "High risk of blocking. Transfers from this wallet may be blocked on centralized exchanges. We recommend contacting an AML officer.",
-  distribution: [
-    { label: "Dark Market", percent: 4.7, color: "#e03c1a" },
-    { label: "Exchange", percent: 30.4, color: "#4caf50" },
-    { label: "Mixer", percent: 2.1, color: "#ffb300" }
-  ]
+const BLOCKCHAIR_NETWORKS = {
+  btc: { code: "bitcoin", label: "Bitcoin", symbol: "BTC", decimals: 8 },
+  bch: { code: "bitcoin-cash", label: "Bitcoin Cash", symbol: "BCH", decimals: 8 },
+  ltc: { code: "litecoin", label: "Litecoin", symbol: "LTC", decimals: 8 },
+  doge: { code: "dogecoin", label: "Dogecoin", symbol: "DOGE", decimals: 8 },
+  dash: { code: "dash", label: "Dash", symbol: "DASH", decimals: 8 },
+  zec: { code: "zcash", label: "Zcash", symbol: "ZEC", decimals: 8 },
+  xrp: { code: "ripple", label: "Ripple", symbol: "XRP", decimals: 6 },
 };
+
+function detectNetwork(address) {
+  // ETH (Etherscan)
+  if (/^(0x)?[0-9a-fA-F]{40}$/.test(address) || (address.startsWith("0x") && address.length === 42))
+    return { key: "eth", label: "Ethereum", symbol: "ETH", explorer: `https://etherscan.io/address/${address}` };
+  // BTC
+  if (/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/.test(address)) return { key: "btc", ...BLOCKCHAIR_NETWORKS.btc, explorer: `https://blockchair.com/bitcoin/address/${address}` };
+  // BCH (legacy + cashaddr)
+  if (/^(bitcoincash:)?(q|p)[a-z0-9]{41}$/.test(address) || /^([13][a-km-zA-HJ-NP-Z1-9]{25,34})$/.test(address)) return { key: "bch", ...BLOCKCHAIR_NETWORKS.bch, explorer: `https://blockchair.com/bitcoin-cash/address/${address}` };
+  // LTC
+  if (/^(ltc1|[LM3])[a-zA-HJ-NP-Z0-9]{26,39}$/.test(address)) return { key: "ltc", ...BLOCKCHAIR_NETWORKS.ltc, explorer: `https://blockchair.com/litecoin/address/${address}` };
+  // DOGE
+  if (/^(D){1}[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}$/.test(address)) return { key: "doge", ...BLOCKCHAIR_NETWORKS.doge, explorer: `https://blockchair.com/dogecoin/address/${address}` };
+  // DASH
+  if (/^X[1-9A-HJ-NP-Za-km-z]{33}$/.test(address)) return { key: "dash", ...BLOCKCHAIR_NETWORKS.dash, explorer: `https://blockchair.com/dash/address/${address}` };
+  // ZEC
+  if (/^t1[0-9A-Za-z]{33}$/.test(address)) return { key: "zec", ...BLOCKCHAIR_NETWORKS.zec, explorer: `https://blockchair.com/zcash/address/${address}` };
+  // XRP
+  if (/^r[0-9a-zA-Z]{24,34}$/.test(address)) return { key: "xrp", ...BLOCKCHAIR_NETWORKS.xrp, explorer: `https://blockchair.com/ripple/address/${address}` };
+  return null;
+}
+
+function riskMock(txCount) {
+  if (txCount > 5000) return { score: 3, label: "High Risk", color: RED, msg: "High risk of blocking. Transfers from this wallet may be blocked on centralized exchanges. We recommend contacting an AML officer." };
+  if (txCount > 500) return { score: 6, label: "Medium Risk", color: ORANGE, msg: "Medium risk. Activity detected but nothing critical." };
+  return { score: 9, label: "Trusted", color: GREEN, msg: "This wallet is generally considered safe." };
+}
 
 export default function AmlTab() {
   const [address, setAddress] = useState("");
@@ -117,71 +129,100 @@ export default function AmlTab() {
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
 
-  // Risk scoring logic (mock example)
-  function getRiskScore(txCount) {
-    if (txCount > 8000) return { score: 3, label: "High Risk", color: "#e03c1a" };
-    if (txCount > 2000) return { score: 7, label: "Low Risk", color: "#4caf50" };
-    return { score: 9, label: "Trusted", color: "#4caf50" };
-  }
-
   const handleAnalyze = async () => {
     setErr(null);
     setData(null);
     if (!address) return;
     setLoading(true);
 
+    const networkInfo = detectNetwork(address);
+    if (!networkInfo) {
+      setErr("Unknown or unsupported wallet format.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=1QUX49MGQE21PWNXJSANUUU2ASHYUGMDKK`;
-      const res = await fetch(url);
-      const json = await res.json();
+      if (networkInfo.key === "eth") {
+        // ETH via Etherscan
+        const apiKey = "1QUX49MGQE21PWNXJSANUUU2ASHYUGMDKK";
+        const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=${apiKey}`;
+        const res = await fetch(url);
+        const json = await res.json();
 
-      if (!json.result || !Array.isArray(json.result) || json.result.length === 0) {
-        setErr("No data or invalid address.");
-        setLoading(false);
-        return;
-      }
-
-      const txs = json.result;
-      const firstTx = txs[0];
-      const lastTx = txs[txs.length - 1];
-      let totalIn = 0;
-      let totalOut = 0;
-      let uniqueAddresses = new Set();
-
-      for (const tx of txs) {
-        if (tx.from.toLowerCase() === address.toLowerCase()) {
-          totalOut += Number(tx.value) / 1e18;
-          uniqueAddresses.add(tx.to.toLowerCase());
+        if (!json.result || !Array.isArray(json.result) || json.result.length === 0) {
+          setErr("No data or invalid ETH address.");
+          setLoading(false);
+          return;
         }
-        if (tx.to.toLowerCase() === address.toLowerCase()) {
-          totalIn += Number(tx.value) / 1e18;
-          uniqueAddresses.add(tx.from.toLowerCase());
+
+        const txs = json.result;
+        const firstTx = txs[0];
+        const lastTx = txs[txs.length - 1];
+        let totalIn = 0;
+        let totalOut = 0;
+        let uniqueAddresses = new Set();
+
+        for (const tx of txs) {
+          if (tx.from.toLowerCase() === address.toLowerCase()) {
+            totalOut += Number(tx.value) / 1e18;
+            uniqueAddresses.add(tx.to.toLowerCase());
+          }
+          if (tx.to.toLowerCase() === address.toLowerCase()) {
+            totalIn += Number(tx.value) / 1e18;
+            uniqueAddresses.add(tx.from.toLowerCase());
+          }
         }
+
+        const risk = riskMock(txs.length);
+
+        setData({
+          network: networkInfo.label,
+          address,
+          firstTransaction: new Date(firstTx.timeStamp * 1000).toLocaleDateString(),
+          lastActive: new Date(lastTx.timeStamp * 1000).toLocaleDateString(),
+          totalReceived: totalIn.toFixed(6) + " ETH",
+          totalSent: totalOut.toFixed(6) + " ETH",
+          totalTransactions: txs.length,
+          uniqueInteractions: uniqueAddresses.size,
+          riskScore: risk.score,
+          riskLabel: risk.label,
+          riskColor: risk.color,
+          riskMsg: risk.msg,
+          blockExplorer: networkInfo.explorer,
+        });
+      } else {
+        // ALL other Blockchair coins
+        const nc = BLOCKCHAIR_NETWORKS[networkInfo.key];
+        const url = `https://api.blockchair.com/${nc.code}/dashboards/address/${address}`;
+        const res = await fetch(url);
+        const json = await res.json();
+        if (!json.data || !json.data[address] || !json.data[address].address) {
+          setErr("No data or invalid address.");
+          setLoading(false);
+          return;
+        }
+        const info = json.data[address].address;
+        const risk = riskMock(info.transaction_count || info.transaction_count_received || 0);
+
+        setData({
+          network: nc.label,
+          address,
+          firstTransaction: info.first_seen_receiving || "-",
+          lastActive: info.last_seen_receiving || "-",
+          totalReceived: (info.received / Math.pow(10, nc.decimals)).toFixed(nc.decimals) + ` ${nc.symbol}`,
+          totalSent: (info.spent / Math.pow(10, nc.decimals)).toFixed(nc.decimals) + ` ${nc.symbol}`,
+          totalTransactions: info.transaction_count,
+          uniqueInteractions: info.output_count || info.outputs_count || "-",
+          riskScore: risk.score,
+          riskLabel: risk.label,
+          riskColor: risk.color,
+          riskMsg: risk.msg,
+          blockExplorer: networkInfo.explorer,
+        });
       }
-
-      // Risk mock for demo (replace with real scoring)
-      const risk = getRiskScore(txs.length);
-
-      setData({
-        address,
-        firstTransaction: new Date(firstTx.timeStamp * 1000).toLocaleDateString(),
-        lastActive: new Date(lastTx.timeStamp * 1000).toLocaleDateString(),
-        totalReceived: totalIn.toFixed(6) + " ETH",
-        totalSent: totalOut.toFixed(6) + " ETH",
-        totalTransactions: txs.length,
-        uniqueInteractions: uniqueAddresses.size,
-        riskScore: risk.score,
-        riskLabel: risk.label,
-        riskColor: risk.color,
-        etherscan: `https://etherscan.io/address/${address}`,
-        metasleuth: `https://metasleuth.io/address/${address}`,
-        breadcrumbs: `https://www.breadcrumbs.app/address/${address}`,
-        riskMessage: mockRiskData.message,
-        riskDistribution: mockRiskData.distribution
-      });
-
     } catch (e) {
-      setErr("Error fetching data.");
+      setErr("Error fetching blockchain data.");
     }
     setLoading(false);
   };
@@ -189,24 +230,42 @@ export default function AmlTab() {
   return (
     <Box sx={{ p: { xs: 1, md: 2 }, maxWidth: 900, mx: "auto", background: BG }}>
       <Card>
-        <Label variant="h4" sx={{ fontSize: 28, mb: 2 }}>
+        <Typography
+          sx={{
+            fontFamily: "IBM Plex Mono, monospace",
+            color: ACCENT,
+            fontSize: 26,
+            fontWeight: 700,
+            mb: 1,
+            letterSpacing: 0.5,
+          }}
+        >
           Crypto Address AML Analysis
-        </Label>
+        </Typography>
         <Typography
           variant="body2"
-          sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", mb: 3, fontSize: 16 }}
+          sx={{
+            color: ACCENT,
+            fontFamily: "IBM Plex Mono, monospace",
+            mb: 3,
+            fontSize: 16,
+          }}
         >
-          Enter an ETH address to check its transaction history and risk score using Etherscan API.
+          Enter a BTC, ETH, LTC, BCH, DOGE, DASH, ZEC, or XRP address to check its transaction history and risk score.
         </Typography>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={9}>
             <TextField
               fullWidth
-              placeholder="Enter Ethereum address"
+              placeholder="Enter any supported crypto address"
               value={address}
               onChange={(e) => setAddress(e.target.value.trim())}
               sx={{
-                input: { fontFamily: "IBM Plex Mono, monospace", fontSize: 17, color: ACCENT },
+                input: {
+                  fontFamily: "IBM Plex Mono, monospace",
+                  fontSize: 17,
+                  color: ACCENT,
+                },
                 "& .MuiOutlinedInput-root": {
                   background: "#fff6f2",
                   borderRadius: "10px",
@@ -219,14 +278,24 @@ export default function AmlTab() {
             />
           </Grid>
           <Grid item xs={12} sm={3}>
-            <AccentButton
+            <Button
               fullWidth
               onClick={handleAnalyze}
               disabled={!address || loading}
-              sx={{ py: 1.4 }}
+              sx={{
+                background: ACCENT,
+                color: "#fff",
+                fontWeight: 600,
+                fontFamily: "IBM Plex Mono, monospace",
+                fontSize: 18,
+                borderRadius: 10,
+                textTransform: "none",
+                py: 1.4,
+                "&:hover": { background: "#a84e1a" },
+              }}
             >
               {loading ? <CircularProgress color="inherit" size={24} /> : "Analyze"}
-            </AccentButton>
+            </Button>
           </Grid>
         </Grid>
         {err && (
@@ -241,31 +310,22 @@ export default function AmlTab() {
           <Card>
             <Grid container alignItems="center" spacing={2}>
               <Grid item xs={12} md={9}>
-                <Typography
-                  sx={{
-                    fontFamily: "IBM Plex Mono, monospace",
-                    fontSize: 18,
-                    color: ACCENT,
-                    mb: 1
-                  }}
-                >
-                  Address
-                </Typography>
+                <Label>
+                  Address ({data.network})
+                </Label>
                 <Typography
                   sx={{
                     fontFamily: "IBM Plex Mono, monospace",
                     color: "#b46a3e",
                     wordBreak: "break-all",
-                    fontSize: 17
+                    fontSize: 17,
                   }}
                 >
                   {data.address}
                 </Typography>
               </Grid>
               <Grid item xs={12} md={3}>
-                <Typography sx={{ color: ACCENT, fontSize: 16, fontFamily: "IBM Plex Mono, monospace", mb: 0.7 }}>
-                  Transactions
-                </Typography>
+                <Label>Transactions</Label>
                 <Chip
                   label={data.totalTransactions}
                   sx={{
@@ -273,7 +333,7 @@ export default function AmlTab() {
                     color: ACCENT,
                     fontWeight: 700,
                     fontFamily: "IBM Plex Mono, monospace",
-                    fontSize: 15,
+                    fontSize: 17,
                     border: `2px solid ${BORDER}`,
                   }}
                   size="medium"
@@ -299,36 +359,22 @@ export default function AmlTab() {
                   sx={{
                     color: data.riskColor,
                     fontFamily: "IBM Plex Mono, monospace",
-                    fontWeight: 600,
-                    fontSize: 18,
+                    fontWeight: 700,
+                    fontSize: 21,
                   }}
                 >
-                  {data.riskLabel === "High Risk" ? "High risk of blocking" : "Trusted"}
+                  {data.riskMsg.split(".")[0]}
                 </Typography>
                 <Typography
                   sx={{
                     color: ACCENT,
                     fontFamily: "IBM Plex Mono, monospace",
-                    fontSize: 15,
-                    mb: 2
+                    fontSize: 16,
+                    mb: 2,
                   }}
                 >
-                  {data.riskMessage}
+                  {data.riskMsg}
                 </Typography>
-                <Grid container spacing={1} sx={{ mt: 1 }}>
-                  {data.riskDistribution.map((risk, idx) => (
-                    <Grid item xs={12} md={4} key={idx}>
-                      <Box sx={{ border: `2px solid ${risk.color}`, borderRadius: 10, p: 2, textAlign: "center", mb: 1 }}>
-                        <Typography sx={{ color: risk.color, fontWeight: 700, fontFamily: "IBM Plex Mono, monospace" }}>
-                          {risk.label}
-                        </Typography>
-                        <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontSize: 15 }}>
-                          {risk.percent}%
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  ))}
-                </Grid>
               </Grid>
             </Grid>
           </Card>
@@ -364,40 +410,16 @@ export default function AmlTab() {
 
           <Card sx={{ border: `2px dashed ${BORDER}` }}>
             <Typography sx={{ color: ACCENT, fontWeight: 700, fontFamily: "IBM Plex Mono, monospace", mb: 2 }}>
-              Advanced Analysis (opens in a new tab)
+              View on Block Explorer
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
-                <LinkBtn
-                  fullWidth
-                  href={data.metasleuth}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  MetaSleuth
-                </LinkBtn>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <LinkBtn
-                  fullWidth
-                  href={data.etherscan}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Etherscan
-                </LinkBtn>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <LinkBtn
-                  fullWidth
-                  href={data.breadcrumbs}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Breadcrumbs
-                </LinkBtn>
-              </Grid>
-            </Grid>
+            <LinkBtn
+              fullWidth
+              href={data.blockExplorer}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {data.network} Explorer
+            </LinkBtn>
           </Card>
         </>
       )}
