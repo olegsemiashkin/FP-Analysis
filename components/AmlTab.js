@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
-// Цвета и стили
+// --- Цвета и стили ---
 const ACCENT = "#c75b23";
 const BG = "#fff6f2";
 const CARD = "#fff";
@@ -20,6 +20,7 @@ const RED = "#e03c1a";
 const GREEN = "#4caf50";
 const ORANGE = "#ffb300";
 
+// --- Компоненты ---
 const Card = styled(Paper)({
   background: CARD,
   borderRadius: 22,
@@ -30,45 +31,28 @@ const Card = styled(Paper)({
 });
 
 const RiskCircle = styled(Box)(({ riskColor }) => ({
-  width: 110,
-  height: 110,
+  width: 160,
+  height: 160,
   borderRadius: "50%",
-  border: `5px solid ${riskColor}`,
+  border: `6px solid ${riskColor}`,
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
   background: "#fff",
-  margin: "0 auto",
-}));
-
-const ScoreNum = styled(Typography)(({ riskColor }) => ({
-  color: riskColor,
-  fontWeight: 800,
-  fontFamily: "IBM Plex Mono, monospace",
-  fontSize: 48,
-  lineHeight: "40px",
-}));
-
-const ScoreLabel = styled(Typography)(({ riskColor }) => ({
-  color: riskColor,
-  fontWeight: 700,
-  fontFamily: "IBM Plex Mono, monospace",
-  fontSize: 18,
-  marginTop: 6,
-  letterSpacing: 0.1,
+  margin: "0 32px 0 0",
 }));
 
 const RiskBadge = styled(Box)(({ borderColor }) => ({
-  border: `3px solid ${borderColor}`,
+  border: `4px solid ${borderColor}`,
   borderRadius: 100,
-  padding: "10px 30px",
+  padding: "12px 38px",
   textAlign: "center",
   background: "#fff",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  minWidth: 150,
+  minWidth: 170,
   margin: "0 14px",
 }));
 
@@ -114,7 +98,7 @@ function detectNetwork(address) {
 }
 
 async function fetchBlacklists() {
-  // Публичные github/spisok (можно добавлять ещё)
+  // Можно добавлять ещё листы
   const urls = [
     "https://raw.githubusercontent.com/AMLBot/blacklists/main/blacklist.txt",
     "https://raw.githubusercontent.com/crystal-blockchain/public-aml-addresses/master/blacklist.txt",
@@ -201,7 +185,7 @@ export default function AmlTab() {
       return;
     }
 
-    // Получаем все blacklist-адреса
+    // --- Blacklist ---
     let isBlacklisted = false;
     let totalTransactions = null;
     try {
@@ -214,7 +198,7 @@ export default function AmlTab() {
       }
     } catch (e) {}
 
-    // Фетчим реальные данные с блокчейна
+    // --- Blockchain data ---
     let firstTransaction = "-",
       lastActive = "-",
       totalReceived = "-",
@@ -235,6 +219,7 @@ export default function AmlTab() {
 
         const txs = json.result;
         totalTransactions = txs.length;
+        if (totalTransactions === 10000) totalTransactions = ">10,000";
         const firstTx = txs[0];
         const lastTx = txs[txs.length - 1];
         let totalIn = 0;
@@ -269,6 +254,7 @@ export default function AmlTab() {
         }
         const info = json.data[address].address;
         totalTransactions = info.transaction_count;
+        if (totalTransactions === 10000) totalTransactions = ">10,000";
         firstTransaction = info.first_seen_receiving || "-";
         lastActive = info.last_seen_receiving || "-";
         totalReceived = (info.received / Math.pow(10, nc.decimals)).toFixed(nc.decimals) + ` ${nc.symbol}`;
@@ -277,7 +263,11 @@ export default function AmlTab() {
       }
     } catch (e) {}
 
-    const risk = getRiskScore({ isBlacklisted, totalTransactions });
+    const risk = getRiskScore({
+      isBlacklisted,
+      totalTransactions: typeof totalTransactions === "string" && totalTransactions.startsWith(">")
+        ? 10001 : totalTransactions // для лимита показываем Medium Risk
+    });
 
     setData({
       network: networkInfo.label,
@@ -413,27 +403,53 @@ export default function AmlTab() {
                   }}
                   size="medium"
                 />
+                {/* Если лимит — выводим сноску */}
+                {data.totalTransactions === ">10,000" && (
+                  <Typography sx={{ color: RED, fontFamily: "IBM Plex Mono, monospace", fontSize: 15, mt: 1 }}>
+                    API limit: showing first 10,000 transactions
+                  </Typography>
+                )}
               </Grid>
             </Grid>
           </Card>
 
-          {/* RISK CARD */}
           <Card>
-            <Grid container alignItems="center" spacing={2}>
-              <Grid item xs={12} md={4}>
-                <RiskCircle riskColor={data.riskColor}>
-                  <ScoreNum riskColor={data.riskColor}>{data.riskScore}</ScoreNum>
-                  <ScoreLabel riskColor={data.riskColor}>{data.riskLabel}</ScoreLabel>
-                </RiskCircle>
-              </Grid>
-              <Grid item xs={12} md={8} sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 4, flexWrap: "wrap" }}>
+              {/* Слева — risk score */}
+              <RiskCircle riskColor={data.riskColor}>
                 <Typography
                   sx={{
                     color: data.riskColor,
+                    fontSize: 72,
+                    fontWeight: 900,
+                    lineHeight: 1,
                     fontFamily: "IBM Plex Mono, monospace",
+                  }}
+                >
+                  {data.riskScore}
+                </Typography>
+                <Typography
+                  sx={{
+                    color: data.riskColor,
+                    fontSize: 28,
                     fontWeight: 700,
-                    fontSize: 23,
-                    mb: 1,
+                    letterSpacing: 1,
+                    fontFamily: "IBM Plex Mono, monospace",
+                    mt: 1,
+                  }}
+                >
+                  {data.riskLabel}
+                </Typography>
+              </RiskCircle>
+
+              {/* Центр/справа — текст и светофор */}
+              <Box sx={{ minWidth: 350 }}>
+                <Typography
+                  sx={{
+                    color: data.riskColor,
+                    fontWeight: 800,
+                    fontSize: 32,
+                    fontFamily: "IBM Plex Mono, monospace",
                   }}
                 >
                   {data.riskMsg.split(".")[0]}
@@ -442,39 +458,41 @@ export default function AmlTab() {
                   sx={{
                     color: ACCENT,
                     fontFamily: "IBM Plex Mono, monospace",
-                    fontSize: 15.5,
-                    mb: 2,
+                    fontSize: 19,
+                    mb: 3,
                   }}
                 >
                   {data.riskMsg}
                 </Typography>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    gap: 1.5,
-                    mt: 2,
-                  }}
-                >
+                <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
                   {data.riskDistribution.map((risk) => (
                     <RiskBadge borderColor={risk.color} key={risk.label}>
-                      <Typography sx={{ color: risk.color, fontWeight: 700, fontFamily: "IBM Plex Mono, monospace", fontSize: 20, mb: -1 }}>
+                      <Typography
+                        sx={{
+                          color: risk.color,
+                          fontWeight: 700,
+                          fontFamily: "IBM Plex Mono, monospace",
+                          fontSize: 26,
+                        }}
+                      >
                         {risk.label}
                       </Typography>
-                      <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontSize: 17 }}>
+                      <Typography
+                        sx={{
+                          color: "#c75b23",
+                          fontFamily: "IBM Plex Mono, monospace",
+                          fontSize: 19,
+                        }}
+                      >
                         {risk.percent}%
                       </Typography>
                     </RiskBadge>
                   ))}
                 </Box>
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
           </Card>
 
-          {/* INFO CARD */}
           <Card>
             <Grid container spacing={2}>
               <Grid item xs={12} md={4}>
