@@ -43,30 +43,46 @@ const StatText = styled(Typography)({
 });
 
 const RiskCircle = styled(Box)(({ riskColor }) => ({
-  width: 88,
-  height: 88,
+  width: 108,
+  height: 108,
   borderRadius: "50%",
-  border: `4px solid ${riskColor}`,
+  border: `5px solid ${riskColor}`,
   display: "flex",
+  flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  flexDirection: "column",
-  margin: "0 auto 16px auto",
+  margin: "0 auto",
+  mb: 2,
 }));
 
-const ScoreText = styled(Typography)(({ riskColor }) => ({
+const ScoreNum = styled(Typography)(({ riskColor }) => ({
+  fontFamily: "IBM Plex Mono, monospace",
+  color: riskColor,
+  fontWeight: 900,
+  fontSize: 42,
+  lineHeight: "44px",
+}));
+
+const ScoreLabel = styled(Typography)(({ riskColor }) => ({
   fontFamily: "IBM Plex Mono, monospace",
   color: riskColor,
   fontWeight: 700,
-  fontSize: 28,
+  fontSize: 18,
+  lineHeight: "18px",
+  marginTop: 8,
+  textAlign: "center",
 }));
 
-const RiskLabel = styled(Typography)(({ riskColor }) => ({
-  fontFamily: "IBM Plex Mono, monospace",
-  color: riskColor,
-  fontWeight: 700,
-  fontSize: 19,
-  marginTop: 4,
+const RiskCard = styled(Box)(({ borderColor }) => ({
+  border: `3px solid ${borderColor}`,
+  borderRadius: 100,
+  px: 4,
+  py: 2,
+  textAlign: "center",
+  minWidth: 170,
+  margin: "0 12px",
+  background: "#fff",
+  display: "inline-block",
 }));
 
 const LinkBtn = styled(Button)({
@@ -97,24 +113,25 @@ const BLOCKCHAIR_NETWORKS = {
 };
 
 function detectNetwork(address) {
-  // ETH (Etherscan)
   if (/^(0x)?[0-9a-fA-F]{40}$/.test(address) || (address.startsWith("0x") && address.length === 42))
     return { key: "eth", label: "Ethereum", symbol: "ETH", explorer: `https://etherscan.io/address/${address}` };
-  // BTC
   if (/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/.test(address)) return { key: "btc", ...BLOCKCHAIR_NETWORKS.btc, explorer: `https://blockchair.com/bitcoin/address/${address}` };
-  // BCH (legacy + cashaddr)
   if (/^(bitcoincash:)?(q|p)[a-z0-9]{41}$/.test(address) || /^([13][a-km-zA-HJ-NP-Z1-9]{25,34})$/.test(address)) return { key: "bch", ...BLOCKCHAIR_NETWORKS.bch, explorer: `https://blockchair.com/bitcoin-cash/address/${address}` };
-  // LTC
   if (/^(ltc1|[LM3])[a-zA-HJ-NP-Z0-9]{26,39}$/.test(address)) return { key: "ltc", ...BLOCKCHAIR_NETWORKS.ltc, explorer: `https://blockchair.com/litecoin/address/${address}` };
-  // DOGE
   if (/^(D){1}[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}$/.test(address)) return { key: "doge", ...BLOCKCHAIR_NETWORKS.doge, explorer: `https://blockchair.com/dogecoin/address/${address}` };
-  // DASH
   if (/^X[1-9A-HJ-NP-Za-km-z]{33}$/.test(address)) return { key: "dash", ...BLOCKCHAIR_NETWORKS.dash, explorer: `https://blockchair.com/dash/address/${address}` };
-  // ZEC
   if (/^t1[0-9A-Za-z]{33}$/.test(address)) return { key: "zec", ...BLOCKCHAIR_NETWORKS.zec, explorer: `https://blockchair.com/zcash/address/${address}` };
-  // XRP
   if (/^r[0-9a-zA-Z]{24,34}$/.test(address)) return { key: "xrp", ...BLOCKCHAIR_NETWORKS.xrp, explorer: `https://blockchair.com/ripple/address/${address}` };
   return null;
+}
+
+// МОК для примера — можно брать реальные данные при интеграции риск-аналитики
+function getRiskDistribution() {
+  return [
+    { label: "Dark Market", percent: 4.7, color: RED },
+    { label: "Exchange", percent: 30.4, color: GREEN },
+    { label: "Mixer", percent: 2.1, color: ORANGE }
+  ];
 }
 
 function riskMock(txCount) {
@@ -190,9 +207,10 @@ export default function AmlTab() {
           riskColor: risk.color,
           riskMsg: risk.msg,
           blockExplorer: networkInfo.explorer,
+          riskDistribution: getRiskDistribution()
         });
       } else {
-        // ALL other Blockchair coins
+        // Blockchair coins
         const nc = BLOCKCHAIR_NETWORKS[networkInfo.key];
         const url = `https://api.blockchair.com/${nc.code}/dashboards/address/${address}`;
         const res = await fetch(url);
@@ -219,6 +237,7 @@ export default function AmlTab() {
           riskColor: risk.color,
           riskMsg: risk.msg,
           blockExplorer: networkInfo.explorer,
+          riskDistribution: getRiskDistribution()
         });
       }
     } catch (e) {
@@ -310,7 +329,7 @@ export default function AmlTab() {
           <Card>
             <Grid container alignItems="center" spacing={2}>
               <Grid item xs={12} md={9}>
-                <Label>
+                <Label sx={{ fontWeight: 700, fontSize: 22 }}>
                   Address ({data.network})
                 </Label>
                 <Typography
@@ -318,14 +337,17 @@ export default function AmlTab() {
                     fontFamily: "IBM Plex Mono, monospace",
                     color: "#b46a3e",
                     wordBreak: "break-all",
-                    fontSize: 17,
+                    fontSize: 18,
+                    mt: 0.5,
                   }}
                 >
                   {data.address}
                 </Typography>
               </Grid>
-              <Grid item xs={12} md={3}>
-                <Label>Transactions</Label>
+              <Grid item xs={12} md={3} sx={{ textAlign: "right" }}>
+                <Label sx={{ fontWeight: 700, fontSize: 20 }}>
+                  Transactions
+                </Label>
                 <Chip
                   label={data.totalTransactions}
                   sx={{
@@ -333,7 +355,7 @@ export default function AmlTab() {
                     color: ACCENT,
                     fontWeight: 700,
                     fontFamily: "IBM Plex Mono, monospace",
-                    fontSize: 17,
+                    fontSize: 19,
                     border: `2px solid ${BORDER}`,
                   }}
                   size="medium"
@@ -343,24 +365,20 @@ export default function AmlTab() {
           </Card>
 
           <Card>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} md={3}>
+            <Grid container alignItems="center" spacing={2}>
+              <Grid item xs={12} md={4}>
                 <RiskCircle riskColor={data.riskColor}>
-                  <ScoreText riskColor={data.riskColor}>
-                    {data.riskScore}
-                  </ScoreText>
-                  <RiskLabel riskColor={data.riskColor}>
-                    {data.riskLabel}
-                  </RiskLabel>
+                  <ScoreNum riskColor={data.riskColor}>{data.riskScore}</ScoreNum>
+                  <ScoreLabel riskColor={data.riskColor}>{data.riskLabel}</ScoreLabel>
                 </RiskCircle>
               </Grid>
-              <Grid item xs={12} md={9}>
+              <Grid item xs={12} md={8}>
                 <Typography
                   sx={{
                     color: data.riskColor,
                     fontFamily: "IBM Plex Mono, monospace",
                     fontWeight: 700,
-                    fontSize: 21,
+                    fontSize: 25,
                   }}
                 >
                   {data.riskMsg.split(".")[0]}
@@ -375,6 +393,26 @@ export default function AmlTab() {
                 >
                   {data.riskMsg}
                 </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 3,
+                    justifyContent: { xs: "flex-start", md: "flex-start" },
+                    flexWrap: "wrap",
+                    mt: 3,
+                  }}
+                >
+                  {data.riskDistribution.map((risk, idx) => (
+                    <RiskCard borderColor={risk.color} key={risk.label}>
+                      <Typography sx={{ color: risk.color, fontWeight: 700, fontFamily: "IBM Plex Mono, monospace", fontSize: 21 }}>
+                        {risk.label}
+                      </Typography>
+                      <Typography sx={{ color: ACCENT, fontFamily: "IBM Plex Mono, monospace", fontSize: 18 }}>
+                        {risk.percent}%
+                      </Typography>
+                    </RiskCard>
+                  ))}
+                </Box>
               </Grid>
             </Grid>
           </Card>
