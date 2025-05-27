@@ -44,16 +44,16 @@ const RiskCircle = styled(Box)(({ riskColor }) => ({
 }));
 
 const RiskBadge = styled(Box)(({ borderColor }) => ({
-  border: `4px solid ${borderColor}`,
+  border: `3px solid ${borderColor}`,
   borderRadius: 100,
-  padding: "12px 38px",
+  padding: "8px 26px",
   textAlign: "center",
   background: "#fff",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  minWidth: 170,
-  margin: "0 14px",
+  minWidth: 140,
+  margin: "0 10px",
 }));
 
 const LinkBtn = styled(Button)({
