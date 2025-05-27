@@ -11,7 +11,7 @@ import {
   CircularProgress
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import InfoIcon from "@mui/icons-material/Info";
 
 const Card = styled(Paper)(({ theme }) => ({
   background: "#181a20",
