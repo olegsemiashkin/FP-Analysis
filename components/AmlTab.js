@@ -9,6 +9,7 @@ import {
   Chip,
   Divider,
   Tooltip,
+  CircularProgress
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -23,19 +24,6 @@ const Card = styled(Paper)(({ theme }) => ({
   border: "1px solid #262b36",
 }));
 
-const RiskCircle = styled(Box)(({ theme, color }) => ({
-  width: 62,
-  height: 62,
-  borderRadius: "50%",
-  border: `2.5px solid ${color}`,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  background: "#222531",
-  margin: "0 auto",
-  marginBottom: theme.spacing(1),
-}));
-
 const StatBox = styled(Box)({
   display: "flex",
   flexDirection: "column",
@@ -43,22 +31,6 @@ const StatBox = styled(Box)({
   padding: "8px 0",
   minWidth: 0,
 });
-
-const RiskBarBg = styled(Box)(({ theme }) => ({
-  width: "100%",
-  height: 7,
-  borderRadius: 4,
-  background: "#23262f",
-  marginRight: 12,
-}));
-
-const RiskBarFg = styled(Box)(({ value, color }) => ({
-  width: `${value}%`,
-  height: "100%",
-  borderRadius: 4,
-  background: color,
-  transition: "width .3s cubic-bezier(.4,0,.2,1)",
-}));
 
 const ExtLinkButton = styled(Button)({
   borderRadius: 12,
@@ -92,44 +64,70 @@ const SecondaryLabel = ({ children, tip }) => (
   </Box>
 );
 
+const ETHERSCAN_API_KEY = "1QUX49MGQE21PWNXJSANUUU2ASHYUGMDKK"; // твой ключ
+
 export default function AmlTab() {
   const [address, setAddress] = useState("");
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
+  const [err, setErr] = useState(null);
 
   const handleAnalyze = async () => {
-    // Здесь будет реальный запрос к API, сейчас используем моковые данные
-    const mockData = {
-      address: address,
-      riskScore: 7,
-      riskLevel: "Low Risk",
-      riskColor: "#4caf50",
-      riskDistribution: {
-        safe: 90,
-        risky: 0,
-        danger: 10,
-      },
-      activity: {
-        firstTransaction: "2025-05-13",
-        lastActive: "2025-05-26",
-        totalReceived: "0.0118 ETH",
-        totalSent: "0.0000 ETH",
-        totalTransactions: 10,
-        uniqueInteractions: 5,
-        contractInteractions: 7,
-      },
-      riskAnalysis: {
-        highRisk: [
-          { name: "Dark Market", percentage: 4.7, amount: 34.65 },
-          { name: "Exchange Fraudulent", percentage: 0.3, amount: 2.21 },
-          { name: "Mixer", percentage: 0.6, amount: 4.42 },
-        ],
-        suspicious: [
-          { name: "Exchange High Risk", percentage: 24.1, amount: 177.68 },
-          { name: "Exchange Moderate Risk", percentage: 23.7, amount: 174.73 },
-        ],
-      },
-    };
-    setData(mockData);
+    setErr(null);
+    setData(null);
+    if (!address) return;
+    setLoading(true);
+
+    try {
+      const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=${ETHERSCAN_API_KEY}`;
+      const res = await fetch(url);
+      const json = await res.json();
+
+      if (!json.result || !Array.isArray(json.result) || json.result.length === 0) {
+        setErr("Нет данных или некорректный адрес.");
+        setLoading(false);
+        return;
+      }
+
+      // Аналитика:
+      const txs = json.result;
+      const firstTx = txs[0];
+      const lastTx = txs[txs.length - 1];
+      let totalIn = 0;
+      let totalOut = 0;
+      let contractInteractions = 0;
+      let uniqueAddresses = new Set();
+
+      for (const tx of txs) {
+        if (tx.from.toLowerCase() === address.toLowerCase()) {
+          totalOut += Number(tx.value) / 1e18;
+          uniqueAddresses.add(tx.to.toLowerCase());
+        }
+        if (tx.to.toLowerCase() === address.toLowerCase()) {
+          totalIn += Number(tx.value) / 1e18;
+          uniqueAddresses.add(tx.from.toLowerCase());
+        }
+        if (tx.contractAddress && tx.contractAddress !== "") contractInteractions++;
+      }
+
+      setData({
+        address,
+        firstTransaction: new Date(firstTx.timeStamp * 1000).toLocaleDateString(),
+        lastActive: new Date(lastTx.timeStamp * 1000).toLocaleDateString(),
+        totalReceived: totalIn.toFixed(6) + " ETH",
+        totalSent: totalOut.toFixed(6) + " ETH",
+        totalTransactions: txs.length,
+        uniqueInteractions: uniqueAddresses.size,
+        contractInteractions: contractInteractions,
+        etherscan: `https://etherscan.io/address/${address}`,
+        metasleuth: `https://metasleuth.io/address/${address}`,
+        breadcrumbs: `https://www.breadcrumbs.app/address/${address}`,
+      });
+
+    } catch (e) {
+      setErr("Ошибка при получении данных.");
+    }
+    setLoading(false);
   };
 
   return (
@@ -143,7 +141,7 @@ export default function AmlTab() {
           color="#8a92a6"
           sx={{ mb: 2, maxWidth: 520 }}
         >
-          Введите ETH-адрес для быстрой оценки рисков, истории транзакций и проверки на связь с мошенническими сервисами. Для расширенного анализа используйте сторонние сервисы ниже.
+          Введите ETH-адрес для базовой проверки истории транзакций через Etherscan API.
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={8}>
@@ -162,12 +160,13 @@ export default function AmlTab() {
                   "&:hover fieldset": { borderColor: "#4567a2" },
                 },
               }}
+              disabled={loading}
             />
           </Grid>
           <Grid item xs={12} sm={4} sx={{ display: "flex", alignItems: "stretch" }}>
             <Button
               onClick={handleAnalyze}
-              disabled={!address}
+              disabled={!address || loading}
               fullWidth
               variant="contained"
               sx={{
@@ -181,10 +180,15 @@ export default function AmlTab() {
                 "&:hover": { background: "#1858d7" },
               }}
             >
-              Анализировать
+              {loading ? <CircularProgress color="inherit" size={24} /> : "Анализировать"}
             </Button>
           </Grid>
         </Grid>
+        {err && (
+          <Typography color="error" sx={{ mt: 2 }}>
+            {err}
+          </Typography>
+        )}
       </Card>
 
       {data && (
@@ -206,22 +210,17 @@ export default function AmlTab() {
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <SecondaryLabel>Риск-оценка</SecondaryLabel>
+                <SecondaryLabel>Транзакций</SecondaryLabel>
                 <Box sx={{ textAlign: "center", mt: 0.5 }}>
-                  <RiskCircle color={data.riskColor}>
-                    <Typography variant="h6" sx={{ color: data.riskColor }}>
-                      {data.riskScore}
-                    </Typography>
-                  </RiskCircle>
                   <Chip
-                    label={data.riskLevel}
+                    label={data.totalTransactions}
                     sx={{
                       background: "#23262f",
-                      color: data.riskColor,
+                      color: "#1976d2",
                       fontWeight: 700,
                       fontSize: 13,
                       border: "1.3px solid",
-                      borderColor: data.riskColor,
+                      borderColor: "#1976d2",
                       mt: -1,
                     }}
                     size="small"
@@ -232,120 +231,44 @@ export default function AmlTab() {
           </Card>
 
           <Card>
-            <SecondaryLabel>Распределение риска</SecondaryLabel>
-            <Grid container spacing={2} sx={{ mt: 0.7 }}>
-              {[
-                { label: "Безопасно", value: data.riskDistribution.safe, color: "#4caf50" },
-                { label: "Риск", value: data.riskDistribution.risky, color: "#ff9800" },
-                { label: "Опасно", value: data.riskDistribution.danger, color: "#f44336" },
-              ].map((item) => (
-                <Grid item xs={4} key={item.label}>
-                  <StatBox>
-                    <Typography
-                      fontWeight={600}
-                      fontSize={23}
-                      color={item.color}
-                      mb={0.4}
-                    >
-                      {item.value}%
-                    </Typography>
-                    <Typography variant="caption" color="#8a92a6">
-                      {item.label}
-                    </Typography>
-                  </StatBox>
-                </Grid>
-              ))}
-            </Grid>
-          </Card>
-
-          <Card>
             <Grid container spacing={2}>
               <Grid item xs={6} md={4}>
                 <StatBox>
                   <SecondaryLabel tip="С момента первой зафиксированной транзакции">Первая транзакция</SecondaryLabel>
-                  <Typography color="#b8bac6">{data.activity.firstTransaction}</Typography>
+                  <Typography color="#b8bac6">{data.firstTransaction}</Typography>
                 </StatBox>
               </Grid>
               <Grid item xs={6} md={4}>
                 <StatBox>
                   <SecondaryLabel>Последняя активность</SecondaryLabel>
-                  <Typography color="#b8bac6">{data.activity.lastActive}</Typography>
+                  <Typography color="#b8bac6">{data.lastActive}</Typography>
                 </StatBox>
               </Grid>
               <Grid item xs={6} md={4}>
                 <StatBox>
                   <SecondaryLabel>Получено</SecondaryLabel>
-                  <Typography color="#b8bac6">{data.activity.totalReceived}</Typography>
+                  <Typography color="#b8bac6">{data.totalReceived}</Typography>
                 </StatBox>
               </Grid>
               <Grid item xs={6} md={4}>
                 <StatBox>
                   <SecondaryLabel>Отправлено</SecondaryLabel>
-                  <Typography color="#b8bac6">{data.activity.totalSent}</Typography>
+                  <Typography color="#b8bac6">{data.totalSent}</Typography>
                 </StatBox>
               </Grid>
               <Grid item xs={6} md={4}>
                 <StatBox>
                   <SecondaryLabel>Всего транзакций</SecondaryLabel>
-                  <Typography color="#b8bac6">{data.activity.totalTransactions}</Typography>
+                  <Typography color="#b8bac6">{data.totalTransactions}</Typography>
                 </StatBox>
               </Grid>
               <Grid item xs={6} md={4}>
                 <StatBox>
                   <SecondaryLabel>Уникальных взаимодействий</SecondaryLabel>
-                  <Typography color="#b8bac6">{data.activity.uniqueInteractions}</Typography>
+                  <Typography color="#b8bac6">{data.uniqueInteractions}</Typography>
                 </StatBox>
               </Grid>
             </Grid>
-          </Card>
-
-          <Card>
-            <Typography fontWeight={700} sx={{ mb: 1 }}>
-              Детализация риска
-            </Typography>
-            <Divider sx={{ mb: 1.5, borderColor: "#252832" }} />
-
-            {data.riskAnalysis.highRisk.length > 0 && (
-              <>
-                <SecondaryLabel tip="Высокорисковые связи или сервисы, связанные с адресом">Высокий риск</SecondaryLabel>
-                {data.riskAnalysis.highRisk.map((item) => (
-                  <Box key={item.name} sx={{ mb: 1.5 }}>
-                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography color="#e57373">{item.name}</Typography>
-                      <Typography color="#c1cbdd">${item.amount}</Typography>
-                    </Box>
-                    <RiskBarBg>
-                      <RiskBarFg value={item.percentage} color="#e57373" />
-                    </RiskBarBg>
-                    <Typography variant="caption" color="#e57373">
-                      {item.percentage}%
-                    </Typography>
-                  </Box>
-                ))}
-              </>
-            )}
-
-            {data.riskAnalysis.suspicious.length > 0 && (
-              <>
-                <Box mt={2}>
-                  <SecondaryLabel tip="Подозрительные сервисы и moderate risk обменники">Подозрительно</SecondaryLabel>
-                </Box>
-                {data.riskAnalysis.suspicious.map((item) => (
-                  <Box key={item.name} sx={{ mb: 1.5 }}>
-                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography color="#ffb74d">{item.name}</Typography>
-                      <Typography color="#c1cbdd">${item.amount}</Typography>
-                    </Box>
-                    <RiskBarBg>
-                      <RiskBarFg value={item.percentage} color="#ffb74d" />
-                    </RiskBarFg>
-                    <Typography variant="caption" color="#ffb74d">
-                      {item.percentage}%
-                    </Typography>
-                  </Box>
-                ))}
-              </>
-            )}
           </Card>
 
           <Card sx={{ background: "#171923" }}>
@@ -356,7 +279,7 @@ export default function AmlTab() {
               <Grid item xs={12} md={4}>
                 <ExtLinkButton
                   fullWidth
-                  href={`https://metasleuth.io/address/${address}`}
+                  href={data.metasleuth}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -366,7 +289,7 @@ export default function AmlTab() {
               <Grid item xs={12} md={4}>
                 <ExtLinkButton
                   fullWidth
-                  href={`https://etherscan.io/address/${address}`}
+                  href={data.etherscan}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -376,7 +299,7 @@ export default function AmlTab() {
               <Grid item xs={12} md={4}>
                 <ExtLinkButton
                   fullWidth
-                  href={`https://www.breadcrumbs.app/address/${address}`}
+                  href={data.breadcrumbs}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
