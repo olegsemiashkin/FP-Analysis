@@ -31,16 +31,16 @@ const Card = styled(Paper)({
 });
 
 const RiskCircle = styled(Box)(({ riskColor }) => ({
-  width: 160,
-  height: 160,
+  width: 120,
+  height: 120,
   borderRadius: "50%",
-  border: `6px solid ${riskColor}`,
+  border: `5px solid ${riskColor}`,
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
   background: "#fff",
-  margin: "0 32px 0 0",
+  margin: "0 28px 0 0",
 }));
 
 const RiskBadge = styled(Box)(({ borderColor }) => ({
